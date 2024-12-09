@@ -22,8 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.movieinfo.MovieInfoDestination
+import com.example.movieinfo.utils.MovieInfoDestination
 import com.example.movieinfo.R
+import com.example.movieinfo.utils.NavigationActions
 
 
 @Composable
@@ -32,20 +33,21 @@ fun ContainerScreen(
     tabIndex: Int = 0,
     content: @Composable (innerPadding: PaddingValues) -> Unit,
 ) {
+    val actions = NavigationActions(navController)
     ContainerScreenContent(
         bottomBarContent = {
             BottomTabSection(tabIndex = tabIndex) {
                 when (it) {
                     0 -> {
-                        navController.navigate(MovieInfoDestination.HOME_ROUTE)
+                        actions.navigateToHome
                     }
 
                     1 -> {
-                        navController.navigate(MovieInfoDestination.SEARCH)
+                        actions.navigateToSearch
                     }
 
                     2 -> {
-                        navController.navigate(MovieInfoDestination.PROFILE)
+                        actions.navigateToProfile
                     }
                 }
             }

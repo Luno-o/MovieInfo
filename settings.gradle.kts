@@ -10,9 +10,14 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
+        flatDir {
+            dirs("libs")
+        }
     }
 }
 
 rootProject.name = "MovieInfo"
 include(":app")
- 
+include(":data")
+include(":domain")

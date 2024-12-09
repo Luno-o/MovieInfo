@@ -39,11 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.movieinfo.MovieInfoDestination
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.CollectionType
-import com.example.movieinfo.entity.MovieType
-import com.example.movieinfo.presentation.MainViewModel
+import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
+import com.movieinfo.domain.entity.CollectionType
+import com.example.movieinfo.utils.MovieInfoDestination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -52,7 +51,7 @@ import kotlinx.coroutines.runBlocking
 
 @Composable
 fun SerialPageView(
-    modifier: Modifier = Modifier, viewModel: MainViewModel,
+    modifier: Modifier = Modifier, viewModel: FilmPageViewModel,
     navController: NavController, movieId: Int, innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     var movieIdS by remember { mutableStateOf<Int?>(null) }
@@ -139,7 +138,7 @@ fun SerialPageView(
                     )
                     Text(text = "${movieBaseInfo.year} ${
                         movieBaseInfo
-                            .genreDtos.joinToString { it.genre }
+                            .genres.joinToString { it.genre }
                     }", color = Color.LightGray
                     )
                     val filmLengthHours = movieBaseInfo.filmLength?.div(60)?.toString() ?: "0"
@@ -147,7 +146,7 @@ fun SerialPageView(
                         id = R.plurals.hours_quantity,
                         count = filmLengthHours.toInt(), filmLengthHours.toInt()
                     )
-                    val filmLengthMinutes = movieBaseInfo.filmLength?.rem(60)?.toString()?:"0"
+                    val filmLengthMinutes = movieBaseInfo.filmLength?.rem(60)?.toString() ?: "0"
                     val pluralStringMinutes = pluralStringResource(
                         id = R.plurals.minutes_quantity,
                         count = filmLengthMinutes.toInt(), filmLengthMinutes.toInt()
@@ -171,30 +170,32 @@ fun SerialPageView(
                 )
             ) {
                 var overflowSD = TextOverflow.Ellipsis
-                val maxLineSD = remember {  mutableIntStateOf(2) }
+                val maxLineSD = remember { mutableIntStateOf(2) }
                 Text(
                     text = "${movieBaseInfo.shortDescription}",
                     fontSize = 16.sp,
                     maxLines = maxLineSD.value,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp).clickable {
-                        if (overflowSD == TextOverflow.Ellipsis){
-                            overflowSD = TextOverflow.Clip
-                            maxLineSD.intValue = 4
-                        }else{
-                            overflowSD = TextOverflow.Ellipsis
-                            maxLineSD.intValue = 2
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .clickable {
+                            if (overflowSD == TextOverflow.Ellipsis) {
+                                overflowSD = TextOverflow.Clip
+                                maxLineSD.intValue = 4
+                            } else {
+                                overflowSD = TextOverflow.Ellipsis
+                                maxLineSD.intValue = 2
+                            }
                         }
-                    }
                 )
                 var overflowFD = TextOverflow.Ellipsis
-                val maxLineFD  = remember {  mutableIntStateOf(5) }
+                val maxLineFD = remember { mutableIntStateOf(5) }
                 Text(text = "${movieBaseInfo.description}",
-                    maxLines = maxLineFD.value, fontSize = 16.sp,modifier = Modifier.clickable {
-                        if (overflowFD == TextOverflow.Ellipsis){
+                    maxLines = maxLineFD.value, fontSize = 16.sp, modifier = Modifier.clickable {
+                        if (overflowFD == TextOverflow.Ellipsis) {
                             overflowFD = TextOverflow.Clip
                             maxLineFD.intValue = 10
-                        }else{
+                        } else {
                             overflowFD = TextOverflow.Ellipsis
                             maxLineFD.intValue = 5
                         }
@@ -234,12 +235,13 @@ fun SerialPageView(
             )
             if (viewModel.similarMovies.collectAsState().value.isNotEmpty()) {
                 MovieCollectionView(
-                    viewModel,
-                    viewModel.similarMovies,
-                    stringResource(id = R.string.similar), CollectionType.SIMILAR, navController,
                     modifier
                         .padding(start = 8.dp)
-                        .fillMaxWidth(), movieId.toString()
+                        .fillMaxWidth(),
+                    null,
+                    viewModel.similarMovies,
+                    stringResource(id = R.string.similar), CollectionType.SIMILAR, navController,
+                    movieId.toString()
                 )
             }
             Spacer(modifier = Modifier.height(128.dp))

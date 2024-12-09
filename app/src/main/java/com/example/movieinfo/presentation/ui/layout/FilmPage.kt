@@ -48,13 +48,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.movieinfo.MovieInfoDestination
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.MovieGalleryImpl
-import com.example.movieinfo.entity.CollectionType
-import com.example.movieinfo.entity.MovieGallery
-import com.example.movieinfo.entity.Staff
-import com.example.movieinfo.presentation.MainViewModel
+import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
+import com.example.movieinfo.presentation.ui.viewModels.ShowCollectionViewModel
+import com.example.movieinfo.utils.MovieInfoDestination
+import com.movieinfo.domain.entity.MovieGalleryImpl
+import com.movieinfo.domain.entity.CollectionType
+import com.movieinfo.domain.entity.MovieGallery
+import com.movieinfo.domain.entity.Staff
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,12 +67,25 @@ import timber.log.Timber
 @Composable
 fun FilmPageView(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel,
+    viewModel: FilmPageViewModel,
     navController: NavController,
     movieId: Int,
     innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     var movieIdS by remember { mutableStateOf<Int?>(null) }
+
+    val scrollState = rememberScrollState()
+    val movieBaseInfo = viewModel.movie
+        .collectAsState().value
+    val actors = viewModel.staffByFilm
+        .collectAsState().value.filter {
+            it.professionKey == "ACTOR"
+
+        }
+    val staff = viewModel.staffByFilm.collectAsState().value.filter {
+        it.professionKey != "ACTOR"
+    }
+    val movieGallery = viewModel.movieGallery.collectAsState().value
     runBlocking {
         viewModel.viewModelScope.launch(Dispatchers.IO) {
             if (movieIdS != movieId) {
@@ -87,18 +101,6 @@ fun FilmPageView(
             }
         }
     }
-    val scrollState = rememberScrollState()
-    val movieBaseInfo = viewModel.movie
-        .collectAsState().value
-    val actors = viewModel.staffByFilm
-        .collectAsState().value.filter {
-            it.professionKey == "ACTOR"
-
-        }
-    val staff = viewModel.staffByFilm.collectAsState().value.filter {
-        it.professionKey != "ACTOR"
-    }
-    val movieGallery = viewModel.movieGallery.collectAsState().value
     if (movieBaseInfo !== null) {
         Column(
             modifier = modifier
@@ -152,7 +154,7 @@ fun FilmPageView(
                     )
                     Text(text = "${movieBaseInfo.year} ${
                         movieBaseInfo
-                            .genreDtos.joinToString { it.genre }
+                            .genres.joinToString { it.genre }
                     }", color = Color.LightGray
                     )
                     val filmLengthHours = "${movieBaseInfo.filmLength?.div(60) ?: 0}"
@@ -229,12 +231,13 @@ fun FilmPageView(
             )
             if (viewModel.similarMovies.collectAsState().value.isNotEmpty()) {
                 MovieCollectionView(
-                    viewModel,
-                    viewModel.similarMovies,
-                    stringResource(R.string.similar), CollectionType.SIMILAR, navController,
                     modifier
                         .padding(start = 8.dp)
-                        .fillMaxWidth(), movieBaseInfo.kpID.toString()
+                        .fillMaxWidth(),
+                    null,
+                    viewModel.similarMovies,
+                    stringResource(R.string.similar), CollectionType.SIMILAR, navController,
+                    movieBaseInfo.kpID.toString()
                 )
             }
             Spacer(modifier = Modifier.height(128.dp))
@@ -243,12 +246,14 @@ fun FilmPageView(
 }
 
 @Composable
-fun ToolRow(viewModel: MainViewModel) {
+fun ToolRow(viewModel: FilmPageViewModel) {
     val kpID = viewModel.movie.collectAsStateWithLifecycle().value?.kpID
     kpID?.let {
         runBlocking {
-            Timber.d("ToolRow get collections id by $kpID")
-            viewModel.getCollectionsIdForMovie(kpID)
+            viewModel.viewModelScope.launch(Dispatchers.IO) {
+                viewModel.getCollectionsIdForMovie(kpID)
+                Timber.d("ToolRow get collections id by $kpID")
+            }
         }
     }
     val collectionsId = viewModel.collectionsIdForMovie.collectAsStateWithLifecycle().value
@@ -273,7 +278,8 @@ fun ToolRow(viewModel: MainViewModel) {
                         it
                     )
             }
-        }, modifier = Modifier.size(34.dp)) {
+        }, modifier = Modifier.size(34.dp)
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.favourite),
                 contentDescription = null,

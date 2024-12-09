@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.movieinfo.R
 
 @Composable
-fun LoadingScreen(modifier: Modifier = Modifier) {
+fun LoadingScreen() {
 
     Box(
         modifier = Modifier

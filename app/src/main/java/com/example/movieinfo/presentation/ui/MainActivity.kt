@@ -3,7 +3,6 @@ package com.example.movieinfo.presentation.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -13,18 +12,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.movieinfo.presentation.ConnectivityObserver
-import com.example.movieinfo.presentation.MainViewModel
-import com.example.movieinfo.presentation.NetworkConnectivityObserver
+import com.example.movieinfo.App
+import com.example.movieinfo.presentation.ui.layout.onboarding.LoadingScreen
+import com.example.movieinfo.utils.ConnectivityObserver
+import com.example.movieinfo.utils.MovieInfoDestination
+import com.example.movieinfo.utils.MovieNavigationGraph
+import com.example.movieinfo.utils.NetworkConnectivityObserver
+import com.example.movieinfo.utils.SharedPref
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainViewModel by viewModels()
+
+lateinit var start: String
     private val connectivityObserver by lazy { NetworkConnectivityObserver(this) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val appContainer = (application as App).container
 
         setContent {
             Surface {
@@ -32,20 +37,30 @@ class MainActivity : ComponentActivity() {
                     initial = ConnectivityObserver.Status.Unavailable
                 )
                 if (status == ConnectivityObserver.Status.Available) {
+
+                    start = if (isFirstLaunch()){
+                        MovieInfoDestination.ON_BOARDING
+                    } else MovieInfoDestination.HOME_ROUTE
                     val navController = rememberNavController()
-                    MovieNavigationGraph(viewModel = viewModel, navController = navController)
+                    MovieNavigationGraph(
+                        navController = navController,
+                        appContainer = appContainer, startDestination = start
+                    )
                 } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Network status : $status")
-                    }
+                    LoadingScreen()
+//                    Box(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Text(text = "Network status : $status")
+//                    }
                 }
 
             }
         }
     }
-
+private fun isFirstLaunch() : Boolean{
+    return SharedPref.getInstance(application).isFirstLaunch()
+}
 }
 

@@ -15,21 +15,22 @@ import com.example.movieinfo.R
 fun GlideImageWithPreview(
     data: Any?,
     modifier: Modifier = Modifier,
-    contentDescription : String? = null,
+    contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop
 ) {
-    if(data == null){
-        Image(painter = painterResource(id = R.drawable.picture0),
-            contentDescription =contentDescription,
-            modifier = modifier ,
+    if (data == null) {
+        Image(
+            painter = painterResource(id = R.drawable.picture0),
+            contentDescription = contentDescription,
+            modifier = modifier,
             alignment = Alignment.Center,
             contentScale = contentScale
         )
-    }else{
+    } else {
         GlideImage(
             model = data,
             contentDescription = contentDescription,
-            modifier = modifier ,
+            modifier = modifier,
             contentScale = contentScale
         )
     }

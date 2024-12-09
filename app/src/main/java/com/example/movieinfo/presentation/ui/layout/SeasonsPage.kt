@@ -1,6 +1,5 @@
 package com.example.movieinfo.presentation.ui.layout
 
-import android.widget.SearchView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,10 +18,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,31 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieinfo.R
-import com.example.movieinfo.data.moviesDto.SerialWrapperDto
-import com.example.movieinfo.entity.Episode
-import com.example.movieinfo.entity.MovieBaseInfo
-import com.example.movieinfo.entity.MovieForStaff
-import com.example.movieinfo.entity.Staff
-import com.example.movieinfo.entity.actorCardForPreview
-import com.example.movieinfo.entity.dragonEpisode
-import com.example.movieinfo.entity.dragonEpisodeList
-import com.example.movieinfo.entity.emptyMovieBaseInfo
-import com.example.movieinfo.entity.emptyStaffFullInfo
-import com.example.movieinfo.entity.filmographyForPreview
-import com.example.movieinfo.presentation.MainViewModel
+import com.movieinfo.domain.entity.Episode
 import com.example.movieinfo.presentation.ui.layout.TabRowDefaults.tabIndicatorOffset
+import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
 
 @Composable
 fun SeasonsPageView(
-    viewModel: MainViewModel,
+    viewModel: FilmPageViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues = PaddingValues(0.dp)
@@ -108,25 +93,29 @@ fun SeasonsPageView(
                     .weight(0.2f)
             )
         }
-Row(modifier =Modifier.padding(start = 16.dp, bottom = 16.dp),
-    verticalAlignment = Alignment.CenterVertically) {
-    Text(text = "Сезоны", fontSize = 14.sp)
-    SeasonsTabSection (tabList = tabList, tabAddInfo =  null
-        ){
-        selectedTabIndex = it
-    }
-}
+        Row(
+            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Сезоны", fontSize = 14.sp)
+            SeasonsTabSection(
+                tabList = tabList, tabAddInfo = null
+            ) {
+                selectedTabIndex = it
+            }
+        }
 
-          LazyColumn(modifier = Modifier.padding(top = 16.dp, start = 8.dp)) {
-                serialInfo[selectedTabIndex].episodes.forEachIndexed { index, episode ->
-                 item {
-                      SeasonItem(episode = episode)
-                    }
+        LazyColumn(modifier = Modifier.padding(top = 16.dp, start = 8.dp)) {
+            serialInfo[selectedTabIndex].episodes.forEachIndexed { index, episode ->
+                item {
+                    SeasonItem(episode = episode)
                 }
             }
+        }
 
     }
 }
+
 @Composable
 fun SeasonsTabSection(
     modifier: Modifier = Modifier,
@@ -147,7 +136,9 @@ fun SeasonsTabSection(
         divider = {},
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
-                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]).size(0.dp),// Customize the height of the indicator
+                modifier = Modifier
+                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                    .size(0.dp),// Customize the height of the indicator
                 color = Color.Black // Customize the color of the indicator
 
             )
@@ -157,13 +148,16 @@ fun SeasonsTabSection(
             Tab(selected = selectedTabIndex == index,
                 selectedContentColor = Color(61, 59, 255, 1),
                 unselectedContentColor = inactiveColor,
-                modifier = Modifier.padding(start = 8.dp).wrapContentWidth(),
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .wrapContentWidth(),
                 onClick = {
                     selectedTabIndex = index
                     onTabSelection(index)
                 }) {
 
-                Row(verticalAlignment = Alignment.CenterVertically,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .background(
                             if (selectedTabIndex == index) Color(
@@ -178,14 +172,20 @@ fun SeasonsTabSection(
                             shape = RoundedCornerShape(15.dp)
                         )
                         .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
-                ){
+                ) {
                     Text(
                         text = item, fontSize = 16.sp,
                         color = if (selectedTabIndex == index) Color.White else Color.Black,
 
                         )
-                    tabAddInfo?.let { Text(text = it[index], fontSize = 14.sp,color = Color.Black.copy(0.5f)
-                        , modifier = Modifier.padding(start = 8.dp)) }
+                    tabAddInfo?.let {
+                        Text(
+                            text = it[index],
+                            fontSize = 14.sp,
+                            color = Color.Black.copy(0.5f),
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
                 }
 
             }
@@ -195,7 +195,7 @@ fun SeasonsTabSection(
 }
 
 @Composable
-fun SeasonItem(episode: Episode){
+fun SeasonItem(episode: Episode) {
     Row(
         modifier = Modifier
             .padding(16.dp)

@@ -4,8 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,17 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -53,29 +45,28 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.movieinfo.MovieInfoDestination
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.MovieBaseInfo
-import com.example.movieinfo.presentation.ListPagingFilterMovieCollection
-import com.example.movieinfo.presentation.ListPagingMovieCollection
-import com.example.movieinfo.presentation.MainViewModel
 import com.example.movieinfo.presentation.ui.layout.TabRowDefaults.tabIndicatorOffset
+import com.example.movieinfo.presentation.ui.viewModels.SearchPageViewModel
+import com.example.movieinfo.utils.MovieInfoDestination
+import com.movieinfo.domain.entity.MovieType
+import com.movieinfo.domain.entity.OrderType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchSettingsMainPageView(viewModel: MainViewModel,navController: NavController) {
-    val pageData by lazy { ListPagingFilterMovieCollection.pager(viewModel).flow }
-    val mainSearchTabList = listOf("Все", "Фильмы", "Сериалы")
-    val mainSortTabList = listOf("Дата", "Популярность", "Рейтинг")
-    val yearRange  = viewModel.yearRange.collectAsState()
-    val sliderPosition  = viewModel.raitingRange.collectAsState()
-    val countrySt by remember { mutableStateOf(viewModel.countriesToId.map { it.second }[viewModel.coutryInd.value]) }
-    val genreSt by remember { mutableStateOf(viewModel.genresToId.map { it.second }[viewModel.genreInd.value]) }
+fun SearchSettingsMainPageView(viewModel: SearchPageViewModel, navController: NavController) {
+
+    val mainSearchTabList = viewModel.mainSearchTabList
+    val mainSortTabList = viewModel.mainSortTabList
+    val yearRange = viewModel.yearRange.collectAsState()
+    val sliderPosition = viewModel.ratingRange.collectAsState()
+    val countrySt by remember { mutableStateOf(viewModel.countriesToId.map { it.second }[viewModel.filterMovie.value.countryInd.first()]) }
+    val genreSt by remember { mutableStateOf(viewModel.genresToId.map { it.second }[viewModel.filterMovie.value.genreInd.first()]) }
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -121,38 +112,64 @@ fun SearchSettingsMainPageView(viewModel: MainViewModel,navController: NavContro
                 .padding(start = 24.dp, top = 8.dp, bottom = 16.dp)
                 .align(Alignment.Start)
         )
-        SearchTabSection(tabList = mainSearchTabList, tabAddInfo = null, selectedIndex = viewModel.movieTypeInd) {
-viewModel.movieTypeInd.intValue = it
+        SearchTabSection(
+            tabList = mainSearchTabList,
+            tabAddInfo = null,
+            selectedIndex = viewModel.movieTypeInd
+        ) {
+            viewModel.movieTypeInd.intValue = it
+            viewModel.filterMovie.value =
+                viewModel.filterMovie.value.copy(movieType = MovieType.entries[viewModel.movieTypeInd.intValue].name)
+
+            Timber.d("type change to ${viewModel.filterMovie.value.movieType}")
         }
 
 
-        FilterString("Страна", countrySt){
+        FilterString("Страна", countrySt) {
             navController.navigate(MovieInfoDestination.FILTER_COUNTRY)
         }
-        FilterString(name = "Жанр", value = genreSt){
-navController.navigate(MovieInfoDestination.FILTER_GENRE)
+        FilterString(name = "Жанр", value = genreSt) {
+            navController.navigate(MovieInfoDestination.FILTER_GENRE)
         }
-        FilterString(name = "Год", value = "С ${yearRange.value.first} до ${yearRange.value.second}"){
-navController.navigate(MovieInfoDestination.FILTER_YEAR)
+        FilterString(
+            name = "Год",
+            value = "С ${yearRange.value.first} до ${yearRange.value.second}"
+        ) {
+            navController.navigate(MovieInfoDestination.FILTER_YEAR)
         }
-        FilterString(name = "Рейтинг", value = if (sliderPosition == (0f..10f)) "Любой"
-        else "С ${sliderPosition.value.start} до ${sliderPosition.value.endInclusive}"){}
-RangeSlider(value = sliderPosition.value,
-    steps = 8,
-    modifier = Modifier.padding(horizontal = 24.dp),
-    onValueChange = {
-    range->
-        range.start.roundToInt().toFloat()
-        range.endInclusive.roundToInt().toFloat()
-        viewModel.raitingRange.value = range
-},
-    valueRange = 1f..10f)
-        Row(horizontalArrangement = Arrangement.SpaceBetween,
+        FilterString(
+            name = "Рейтинг", value = if (sliderPosition == (0f..10f)) "Любой"
+            else "С ${sliderPosition.value.start} до ${sliderPosition.value.endInclusive}"
+        ) {}
+        RangeSlider(
+            value = sliderPosition.value,
+            steps = 8,
+            modifier = Modifier.padding(horizontal = 24.dp),
+            onValueChange = { range ->
+                range.start.roundToInt().toFloat()
+                range.endInclusive.roundToInt().toFloat()
+                viewModel.ratingRange.value = range
+                viewModel.filterMovie.value = viewModel.filterMovie.value.copy(
+                    raitingFrom = viewModel.ratingRange.value.start.toInt(),
+                    raitingTo = viewModel.ratingRange.value.endInclusive.toInt()
+                )
+            },
+            valueRange = 1f..10f
+        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)) {
-        Text(text = sliderPosition.value.start.toInt().toString(), color = Color.Black.copy(0.5f))
-        Text(text = sliderPosition.value.endInclusive.toInt().toString(), color = Color.Black.copy(0.5f))
+                .padding(horizontal = 24.dp)
+        ) {
+            Text(
+                text = sliderPosition.value.start.toInt().toString(),
+                color = Color.Black.copy(0.5f)
+            )
+            Text(
+                text = sliderPosition.value.endInclusive.toInt().toString(),
+                color = Color.Black.copy(0.5f)
+            )
         }
         Spacer(modifier = Modifier.height(24.dp))
         Text(
@@ -162,20 +179,28 @@ RangeSlider(value = sliderPosition.value,
                 .padding(start = 24.dp, top = 8.dp, bottom = 16.dp)
                 .align(Alignment.Start)
         )
-        SearchTabSection(tabList = mainSortTabList, tabAddInfo = null, selectedIndex = viewModel.sortTypeIndex) {
+        SearchTabSection(
+            tabList = mainSortTabList,
+            tabAddInfo = null,
+            selectedIndex = viewModel.sortTypeIndex
+        ) {
             viewModel.sortTypeIndex.intValue = it
+
+            viewModel.filterMovie.value = viewModel.filterMovie.value.copy(
+                sortType = OrderType.entries[viewModel.sortTypeIndex.intValue].name
+            )
         }
         Button(onClick = {
             viewModel.viewModelScope.launch(Dispatchers.IO) {
-            viewModel.searchByFilter()
+
             }
-        }){
+        }) {
             Text(stringResource(R.string.Search))
         }
-        val searchResult = pageData.collectAsLazyPagingItems()
+        val searchResult = viewModel.movieSearchFilterResult.collectAsLazyPagingItems()
         LazyColumn {
-           items(searchResult.itemCount){index->
-               searchResult[index]?.let { MovieCardView(it,navController) }
+            items(searchResult.itemCount) { index ->
+                searchResult[index]?.let { MovieCardView(it, navController) }
             }
             searchResult.apply {
                 when {
@@ -189,28 +214,33 @@ RangeSlider(value = sliderPosition.value,
                             }
                         }
                     }
-                    loadState.append is LoadState.Loading->{
+
+                    loadState.append is LoadState.Loading -> {
                         item { CircularProgressIndicator() }
                     }
-                    loadState.refresh is LoadState.Error->{
-                        val e= searchResult.loadState.refresh as LoadState.Error
-                        item{
-                            Column (modifier = Modifier.fillMaxSize()){
+
+                    loadState.refresh is LoadState.Error -> {
+                        val e = searchResult.loadState.refresh as LoadState.Error
+                        item {
+                            Column(modifier = Modifier.fillMaxSize()) {
                                 e.error.localizedMessage?.let {
-                                    Text(text =  it)
+                                    Text(text = it)
                                 }
-                                Button(onClick = {retry()}) { Text("Попробовать снова") }
+                                Button(onClick = { retry() }) { Text("Попробовать снова") }
                             }
                         }
                     }
-                    loadState.append is LoadState.Error->{
+
+                    loadState.append is LoadState.Error -> {
                         val e = searchResult.loadState.append as LoadState.Error
-                        item{
-                            Column(modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.Center) {
+                        item {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center
+                            ) {
                                 e.error.localizedMessage?.let {
                                     Text(it)
-                                    Button(onClick = {retry()}) {
+                                    Button(onClick = { retry() }) {
                                         Text("Попробовать снова")
                                     }
                                 }
@@ -224,7 +254,7 @@ RangeSlider(value = sliderPosition.value,
 }
 
 @Composable
-fun FilterString(name: String, value: String,chosen: Boolean = false,rout:()->Unit) {
+fun FilterString(name: String, value: String, chosen: Boolean = false, rout: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

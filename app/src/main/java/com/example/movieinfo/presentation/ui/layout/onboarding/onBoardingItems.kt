@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,12 +22,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
-
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,12 +40,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.movieinfo.R
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 data class OnBoardingItems(
     val image: Int,
@@ -79,7 +79,7 @@ data class OnBoardingItems(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingView() {
+fun OnboardingView(navController: NavController,onLastButtonClick: () -> Unit) {
     val items = OnBoardingItems.getData()
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
@@ -88,7 +88,9 @@ fun OnboardingView() {
     ) {
         items.size
     }
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.White)) {
         TopSection(onBackClick =
         {
             if (pagerState.currentPage + 1 > 1) scope.launch {
@@ -96,6 +98,10 @@ fun OnboardingView() {
             }
         },
             onSkipClick = {
+                if (pagerState.currentPage+1 == items.size) {
+                    navController.popBackStack()
+                    onLastButtonClick()
+                }
                 if (pagerState.currentPage + 1 < items.size) scope.launch {
                     pagerState.scrollToPage(items.size - 1)
                 }
@@ -117,7 +123,9 @@ fun OnboardingView() {
             Orientation.Horizontal
         ),
         pageContent =  {
-            OnBoardingItem(items = items[it])
+            Timber.d("page count ${pagerState.pageCount} pagerState ${pagerState.currentPage} it $it")
+            OnBoardingItem(items = items[it],isLast = pagerState.pageCount == pagerState.currentPage+1,
+                onLastButtonClick =onLastButtonClick,navController )
         }
     )
     BottomSection(size = items.size, index = pagerState.currentPage) {
@@ -199,7 +207,7 @@ fun Indicator(isSelected: Boolean) {
 }
 
 @Composable
-fun OnBoardingItem(items: OnBoardingItems) {
+fun OnBoardingItem(items: OnBoardingItems,isLast : Boolean,onLastButtonClick: ()-> Unit,navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -217,8 +225,20 @@ fun OnBoardingItem(items: OnBoardingItems) {
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(bottom = 48.dp, start = 24.dp))
+        Timber.d("onBoearding isLast $isLast")
+        if (isLast){
+            TextButton(onClick = {
+                navController.popBackStack()
+                onLastButtonClick()},
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .background(Color(61, 59, 255), shape = RoundedCornerShape(24.dp))){
+                Text("  Все понятно  ", color = Color.White)
+            }
+        }
+
     }
 }
 @Preview
 @Composable
-private fun OnBoardingPreview() = OnboardingView()
+private fun OnBoardingPreview() = OnboardingView(navController = rememberNavController()){}

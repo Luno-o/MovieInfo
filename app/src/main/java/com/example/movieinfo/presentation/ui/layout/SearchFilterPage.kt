@@ -40,20 +40,19 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.movieinfo.MovieInfoDestination
 import com.example.movieinfo.R
-import com.example.movieinfo.presentation.MainViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.movieinfo.presentation.ui.viewModels.SearchPageViewModel
+import com.example.movieinfo.utils.MovieInfoDestination
 
 @Composable
 fun SearchFilterPageView(
     filterType: Int = 0,
-    viewModel: MainViewModel,
+    viewModel: SearchPageViewModel,
     navController: NavController
 ) {
     var pageName: String? = null
     var list: List<String>? = null
-    var state: MutableStateFlow<Int>? = null
+    var state: Array<Int>? = null
     var placeholder: String? = null
     val scrollState = rememberScrollState()
     var isCountry = false
@@ -62,10 +61,10 @@ fun SearchFilterPageView(
         MovieInfoDestination.COUNTRY_TYPE_FILTER -> {
             pageName = stringResource(R.string.country)
             list = viewModel.countriesToId.map { it.second }
-            if (viewModel.queryCountry.text.isNotEmpty()){
-                list = list.filter { it.contains(viewModel.queryCountry.text,true) }
+            if (viewModel.queryCountry.text.isNotEmpty()) {
+                list = list.filter { it.contains(viewModel.queryCountry.text, true) }
             }
-            state = viewModel.coutryInd
+            state = viewModel.filterMovie.value.countryInd
             placeholder = stringResource(R.string.enter_country)
             isCountry = true
         }
@@ -73,10 +72,10 @@ fun SearchFilterPageView(
         MovieInfoDestination.GENRE_TYPE_FILTER -> {
             pageName = stringResource(R.string.genre)
             list = viewModel.genresToId.map { it.second }
-            if (viewModel.queryGenre.text.isNotEmpty()){
-               list= list.filter { it.contains(viewModel.queryGenre.text,true) }
+            if (viewModel.queryGenre.text.isNotEmpty()) {
+                list = list.filter { it.contains(viewModel.queryGenre.text, true) }
             }
-            state = viewModel.genreInd
+            state = viewModel.filterMovie.value.genreInd
             placeholder = stringResource(R.string.enter_genre)
         }
 
@@ -118,7 +117,7 @@ fun SearchFilterPageView(
                     .weight(1f)
             )
         }
-        SearchAppBarCountry(viewModel, placeholder,isCountry)
+        SearchAppBarCountry(viewModel, placeholder, isCountry)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -127,8 +126,13 @@ fun SearchFilterPageView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             list?.forEachIndexed { index, s ->
-                FilterString(name = list[index], chosen = state?.value == index, value = "") {
-                    state?.value = index
+                FilterString(name = list[index], chosen = state?.first() == index, value = "") {
+                    state = arrayOf(index)
+                    if (isCountry) {
+                        viewModel.filterMovie.value.countryInd = state!!
+                    } else {
+                        viewModel.filterMovie.value.genreInd = state!!
+                    }
                     navController.navigate(MovieInfoDestination.SEARCH_FILTER)
                 }
             }
@@ -137,7 +141,7 @@ fun SearchFilterPageView(
 }
 
 @Composable
-fun SearchAppBarCountry(viewModel: MainViewModel, placeholder: String?,isCountry: Boolean) {
+fun SearchAppBarCountry(viewModel: SearchPageViewModel, placeholder: String?, isCountry: Boolean) {
     SearchAppBarFilter(
         leadingIcon = {
             Icon(
@@ -155,13 +159,13 @@ fun SearchAppBarCountry(viewModel: MainViewModel, placeholder: String?,isCountry
             .padding(4.dp)
             .height(32.dp),
         fontSize = 10.sp,
-        placeholderText = placeholder ?: "", viewModel = viewModel
-    , isCountry = isCountry)
+        placeholderText = placeholder ?: "", viewModel = viewModel, isCountry = isCountry
+    )
 }
 
 @Composable
 fun SearchAppBarFilter(
-    modifier: Modifier = Modifier, viewModel: MainViewModel,
+    modifier: Modifier = Modifier, viewModel: SearchPageViewModel,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     placeholderText: String = "Placeholder",

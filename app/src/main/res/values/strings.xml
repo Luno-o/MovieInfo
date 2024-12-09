@@ -49,6 +49,8 @@
     <string name="Search">Найти</string>
     <string name="favourite">Избранное</string>
     <string name="popular_series">Популярные сериалы</string>
+    <string name="clear_history">Очистить историю</string>
+    <string name="bookmarks">Закладки</string>
     <plurals name="hours_quantity">
         <item quantity="one">%1$d час</item>
         <item quantity="zero">%1$d часов</item>

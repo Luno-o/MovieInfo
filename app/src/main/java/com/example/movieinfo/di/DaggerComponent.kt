@@ -1,7 +1,7 @@
 package com.example.movieinfo.di
 
-import com.example.movieinfo.data.ApiKeyInterceptor
-import com.example.movieinfo.data.KinopoiskApi
+import com.movieinfo.data.ApiKeyInterceptor
+import com.movieinfo.data.KinopoiskApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,8 +11,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
-
-
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule{
@@ -37,7 +35,7 @@ return OkHttpClient.Builder()
     }
     @Provides
     @Singleton
-    fun provideKinopoiskApi(retrofit: Retrofit):KinopoiskApi{
+    fun provideKinopoiskApi(retrofit: Retrofit): KinopoiskApi {
         return  retrofit.create(KinopoiskApi::class.java)
     }
 }

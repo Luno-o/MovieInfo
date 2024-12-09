@@ -1,6 +1,5 @@
 package com.example.movieinfo.presentation.ui.layout
 
-import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,24 +17,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.CollectionType
-import com.example.movieinfo.entity.MovieType
-import com.example.movieinfo.presentation.MainViewModel
+import com.example.movieinfo.presentation.ui.viewModels.MainPageViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 
 
 @Composable
 fun MainPageView(
-    viewModel: MainViewModel,
+    viewModel: MainPageViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues = PaddingValues(0.dp),
     state: LazyListState = rememberLazyListState()
 ) {
 
-    val collections = viewModel.setCollections()
-
+    val collections = viewModel.collections
 
     Column(modifier.background(Color.White)) {
         Text(
@@ -50,20 +51,32 @@ fun MainPageView(
         ) {
             items(collections.size) {
                 MovieCollectionView(
-                    viewModel,
-                    collections[it].movieCards,
-                    collections[it].collectionName,
+                    viewModel = null,
+                    flow = collections[it].movieCards,
+                    collectionName = collections[it].collectionName,
                     movieType = collections[it].movieType,
                     navController = navController
                 )
 
 
             }
-            item { Spacer(
-                Modifier
-                    .wrapContentWidth()
-                    .height(64.dp)) }
+            item {
+                Spacer(
+                    Modifier
+                        .wrapContentWidth()
+                        .height(64.dp)
+                )
+            }
         }
 
     }
+//    runBlocking {
+//        viewModel.viewModelScope.launch(Dispatchers.IO) {
+//            Timber.d("MainPage load pages")
+//            viewModel.loadPremieres()
+//            viewModel.loadCollectionTopPopularAll()
+//            viewModel.loadCollectionComicsTheme()
+//            viewModel.loadCollectionTopPopularMovies()
+//        }
+//    }
 }

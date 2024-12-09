@@ -50,34 +50,24 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.CollectionType
-import com.example.movieinfo.presentation.MainViewModel
+import com.movieinfo.domain.entity.CollectionType
+import com.example.movieinfo.presentation.ui.viewModels.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 @Composable
-fun ProfilePageView(viewModel: MainViewModel,
-                    navController: NavController) {
+fun ProfilePageView(
+    viewModel: ProfileViewModel,
+    navController: NavController
+) {
     val scrollState = rememberScrollState()
     val listOfCollection = viewModel.collectionsList.collectAsState().value
     val collections = viewModel.yourCollections.collectAsState().value
     var showDialog by remember { mutableStateOf(false) }
     val stateDialog = rememberTextFieldState("")
 
-
-    runBlocking { viewModel.viewModelScope.launch() {
-        Timber.d("my collections size ${listOfCollection.size}")
-        Timber.d("your collections size ${collections.size}")
-        viewModel.loadWatchedMovie()
-        viewModel.loadYourInterestMovie()
-        if (collections.isEmpty()){
-        viewModel.getCollectionsList()
-        Timber.d("my collections $listOfCollection")
-        viewModel.loadYourCollections(listOfCollection)
-        }
-    } }
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -87,15 +77,18 @@ fun ProfilePageView(viewModel: MainViewModel,
     ) {
         Spacer(modifier = Modifier.height(54.dp))
         if (showDialog) CreateCollectionDialog(onDismissRequest =
-        {showDialog = false}, onConfirmation = {viewModel.addCollection(stateDialog.text.toString())
-                                               showDialog = false},
-            state = stateDialog)
+        { showDialog = false }, onConfirmation = {
+            viewModel.addCollection(stateDialog.text.toString())
+            showDialog = false
+        },
+            state = stateDialog
+        )
         MovieCollectionView(
-            viewModel,
-            viewModel.watchedMovie,
-            stringResource(R.string.watched),
-            CollectionType.WATCHED,
-            navController,
+            viewModel = viewModel,
+            flow = viewModel.watchedMovie,
+            collectionName = stringResource(R.string.watched),
+            movieType = CollectionType.WATCHED,
+            navController = navController,
             allOrCount = false,
             showOrDelete = false,
             modifier = Modifier
@@ -121,9 +114,11 @@ fun ProfilePageView(viewModel: MainViewModel,
             Image(
                 painter = painterResource(id = R.drawable.plus),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp).clickable {
-showDialog = true
-                }
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable {
+                        showDialog = true
+                    }
             )
             Text(
                 text = stringResource(R.string.make_own_collection),
@@ -141,118 +136,135 @@ showDialog = true
         ) {
             items(collections.size) {
                 if (viewModel.yourCollections.value.isNotEmpty())
-                CollectionGridItem(collectionName = listOfCollection[it].collectionName,
-                    collectionSize = collections[it].size,
-                    navController = navController)
+                    CollectionGridItem(
+                        collectionName = listOfCollection[it].collectionName,
+                        collectionSize = collections[it].size,
+                        navController = navController
+                    )
             }
         }
         MovieCollectionView(
-            viewModel,
-            viewModel.yourInterest,
-            stringResource(R.string.by_ur_interest),
-            CollectionType.INTEREST,
-            navController, allOrCount = false,
+            viewModel = viewModel,
+            flow = viewModel.yourInterest,
+            collectionName = stringResource(R.string.by_ur_interest),
+            movieType = CollectionType.INTEREST,
+            navController = navController, allOrCount = false,
             showOrDelete = false
         )
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
-    @Composable
-    fun CreateCollectionDialog(onDismissRequest: () -> Unit,
-                               onConfirmation: () -> Unit,
-                               placeholderText: String =
-                                   "Придумайте название для вашей новой коллекции",
-                               state: TextFieldState){
+@Composable
+fun CreateCollectionDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    placeholderText: String =
+        "Придумайте название для вашей новой коллекции",
+    state: TextFieldState
+) {
 
-        Dialog(onDismissRequest = {onDismissRequest()}) {
-            Card(
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        Card(
+            modifier = Modifier
+                .width(308.dp)
+                .height(240.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
                 modifier = Modifier
-                    .width(308.dp)
-                    .height(240.dp)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .fillMaxSize()
             ) {
-                Column(
+                Icon(painter = painterResource(R.drawable.baseline_close_24),
+                    contentDescription = null,
                     modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    Icon(painter = painterResource(R.drawable.baseline_close_24),
-                        contentDescription = null,
-                        modifier = Modifier.align(Alignment.End).padding(8.dp).clickable {
-onDismissRequest()
+                        .align(Alignment.End)
+                        .padding(8.dp)
+                        .clickable {
+                            onDismissRequest()
                         })
 
-BasicTextField(state = state, modifier = Modifier.height(100.dp)
-    .padding(horizontal =   12.dp),
-    decorator = {innerTextField ->
-        Row(
-            verticalAlignment = Alignment.Top
-        ) {
-
-            Box(Modifier.weight(1f)) {
-                if (state.text.isEmpty()) {
-                    Text(
-                        text = placeholderText,
-                        style = LocalTextStyle.current.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                        ),
-                        modifier = Modifier
-                            .padding(start = 4.dp)
-                            .align(Alignment.CenterStart)
-                        , fontSize = 16.sp
-                    )
-                }
-                innerTextField()
-            }
-        }
-
-    }, textStyle = TextStyle.Default.copy(fontSize = 16.sp)
-)
-
-                        Button(
-                            onClick = { onConfirmation() },
-                            modifier = Modifier.padding(8.dp)
-                                .align(Alignment.End),
-                            shape = ButtonDefaults.textShape,
-                            colors = ButtonDefaults.buttonColors()
-                                .copy(containerColor = Color(61,59,255)),
+                BasicTextField(
+                    state = state, modifier = Modifier
+                        .height(100.dp)
+                        .padding(horizontal = 12.dp),
+                    decorator = { innerTextField ->
+                        Row(
+                            verticalAlignment = Alignment.Top
                         ) {
-                            Text("Готово", color = Color.White, modifier = Modifier.padding(0.dp))
+
+                            Box(Modifier.weight(1f)) {
+                                if (state.text.isEmpty()) {
+                                    Text(
+                                        text = placeholderText,
+                                        style = LocalTextStyle.current.copy(
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                        ),
+                                        modifier = Modifier
+                                            .padding(start = 4.dp)
+                                            .align(Alignment.CenterStart), fontSize = 16.sp
+                                    )
+                                }
+                                innerTextField()
+                            }
                         }
 
+                    }, textStyle = TextStyle.Default.copy(fontSize = 16.sp)
+                )
+
+                Button(
+                    onClick = { onConfirmation() },
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.End),
+                    shape = ButtonDefaults.textShape,
+                    colors = ButtonDefaults.buttonColors()
+                        .copy(containerColor = Color(61, 59, 255)),
+                ) {
+                    Text("Готово", color = Color.White, modifier = Modifier.padding(0.dp))
                 }
+
             }
         }
     }
-@Composable
-fun ErrorDialog(){
-   Dialog(onDismissRequest = {}) {
-       Card(
-           modifier = Modifier
-               .width(360.dp)
-               .height(200.dp),
-           shape = RoundedCornerShape(16.dp),
-       ) {
-           Box(modifier = Modifier.fillMaxSize()){
-           Icon(painter = painterResource(R.drawable.baseline_close_24),
-               contentDescription = null,
-               modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).clickable {
+}
 
-               })
-           Text(text = "Ошибка!", fontSize = 18.sp, fontWeight = FontWeight.Bold,
-               modifier = Modifier.align(Alignment.TopStart).padding(24.dp)
-           )
-           Text(
-               text = "Во время обработки запроса произошла ошибка",
-               modifier = Modifier
-                   .padding(horizontal = 24.dp, vertical = 24.dp)
-                   .align(Alignment.Center),
-               color = Color.Black.copy(alpha = 0.5f),
-               fontSize = 16.sp
-           )
-           }
-       }
-   }
+@Composable
+fun ErrorDialog() {
+    Dialog(onDismissRequest = {}) {
+        Card(
+            modifier = Modifier
+                .width(360.dp)
+                .height(200.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Icon(painter = painterResource(R.drawable.baseline_close_24),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .clickable {
+
+                        })
+                Text(
+                    text = "Ошибка!", fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(24.dp)
+                )
+                Text(
+                    text = "Во время обработки запроса произошла ошибка",
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp, vertical = 24.dp)
+                        .align(Alignment.Center),
+                    color = Color.Black.copy(alpha = 0.5f),
+                    fontSize = 16.sp
+                )
+            }
+        }
+    }
 }
 
 @Composable

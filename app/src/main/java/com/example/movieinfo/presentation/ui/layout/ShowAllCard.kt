@@ -17,12 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.bundleOf
+
 import androidx.navigation.NavController
-import com.example.movieinfo.MovieInfoDestination
+import com.example.movieinfo.utils.MovieInfoDestination
 import com.example.movieinfo.R
-import com.example.movieinfo.presentation.ui.navigate
-import timber.log.Timber
 
 
 @Composable

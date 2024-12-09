@@ -17,31 +17,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.movieinfo.entity.MovieBaseInfo
-import com.example.movieinfo.entity.MovieCollection
-import com.example.movieinfo.entity.MovieCollectionImp
-import com.example.movieinfo.entity.convert
-import com.example.movieinfo.entity.emptyMovieBaseInfo
-import com.example.movieinfo.entity.emptyMovieCard
+import com.example.movieinfo.utils.convert
+import com.movieinfo.data.repository.storage.models.MovieCollectionImpl
+import com.movieinfo.domain.entity.MovieBaseInfo
 
 @Composable
-fun FilmographyMovieItem(movieCard1: MovieCollectionImp? = null,movieCard2: MovieBaseInfo? = null){
+fun FilmographyMovieItem(
+    movieCard1: MovieCollectionImpl? = null,
+    movieCard2: MovieBaseInfo? = null
+) {
     val movieCard = movieCard2?.convert() ?: movieCard1
-    Row(modifier = Modifier
-        .wrapContentSize()
-        .padding(top = 8.dp, end = 8.dp, start = 8.dp),
+    Row(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(top = 8.dp, end = 8.dp, start = 8.dp),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically){
-        Box{
-            GlideImageWithPreview(data = movieCard?.prevPosterUrl,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box {
+            GlideImageWithPreview(
+                data = movieCard?.prevPosterUrl,
                 Modifier
                     .size(111.dp, 156.dp)
-                    .background(Color.LightGray))
+                    .background(Color.LightGray)
+            )
 
-            Text(text = movieCard?.raitingKP.toString(),
+            Text(
+                text = movieCard?.raitingKP.toString(),
                 fontSize = 6.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -54,20 +58,22 @@ fun FilmographyMovieItem(movieCard1: MovieCollectionImp? = null,movieCard2: Movi
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-Column {
-        Text(text = movieCard?.nameRU.toString(),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            modifier = Modifier.padding(start = 16.dp)
+        Column {
+            Text(
+                text = movieCard?.nameRU.toString(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                modifier = Modifier.padding(start = 16.dp)
 
-        )
-        Text(text =  "${movieCard?.year?:""}, ${movieCard?.genreDtos?.joinToString { it.genre }}",
-            fontSize = 12.sp,
-            maxLines = 1,
-            color = Color.Black.copy(0.5f),
-            modifier = Modifier.padding(start = 16.dp)
-        )
-}
+            )
+            Text(
+                text = "${movieCard?.year ?: ""}, ${movieCard?.genre?.joinToString { it.genre }}",
+                fontSize = 12.sp,
+                maxLines = 1,
+                color = Color.Black.copy(0.5f),
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
     }
 }

@@ -24,8 +24,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 
 
-
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -100,6 +98,7 @@ private class ScrollableTabData(
         return centeredTabOffset.coerceIn(0, availableSpace)
     }
 }
+
 private val ScrollableTabRowScrollSpec: AnimationSpec<Float> = tween(
     durationMillis = 250,
     easing = FastOutSlowInEasing
@@ -110,6 +109,7 @@ private enum class TabSlots {
     Divider,
     Indicator
 }
+
 @Immutable
 class TabPosition internal constructor(val left: Dp, val width: Dp) {
     val right: Dp get() = left + width
@@ -182,7 +182,7 @@ fun ScrollableTabRow(
                 maxOf(curr, measurable.maxIntrinsicHeight(Constraints.Infinity))
             }
 
-            val tabConstraints = constraints.copy( minHeight = layoutHeight)
+            val tabConstraints = constraints.copy(minHeight = layoutHeight)
             val tabPlaceables = tabMeasurables
                 .map { it.measure(tabConstraints) }
 
@@ -232,6 +232,7 @@ fun ScrollableTabRow(
         }
     }
 }
+
 object TabRowDefaults {
     /** Default container color of a tab row. */
 

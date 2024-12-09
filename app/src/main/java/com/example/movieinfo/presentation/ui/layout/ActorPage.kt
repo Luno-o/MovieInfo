@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,24 +24,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.movieinfo.MovieInfoDestination
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.CollectionType
-import com.example.movieinfo.presentation.MainViewModel
+import com.example.movieinfo.presentation.ui.viewModels.ActorViewModel
+import com.example.movieinfo.utils.MovieInfoDestination
+import com.movieinfo.domain.entity.CollectionType
 import kotlinx.coroutines.runBlocking
 
 
-class ActorPage {
-}
-
 @Composable
 fun ActorPageView(
-    viewModel: MainViewModel,
+    viewModel: ActorViewModel,
     navController: NavController,
     modifier: Modifier = Modifier, staffID: String,
     innerPadding: PaddingValues = PaddingValues(0.dp)
@@ -101,20 +95,23 @@ fun ActorPageView(
             }
         }
         MovieCollectionView(
-            viewModel,
-            viewModel.staffForMovieCollection,
-            stringResource(R.string.best),
-            CollectionType.BEST,
-            navController,
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp)
+                .padding(start = 8.dp),
+            viewModel = null,
+            flow = viewModel.staffMovieCollection,
+            collectionName = stringResource(R.string.best),
+            movieType = CollectionType.BEST,
+            navController = navController,
         )
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .wrapContentHeight()
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable {
+                    navController.navigate(MovieInfoDestination.STAFF_FILMOGRAPHY)
+                },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -139,9 +136,7 @@ fun ActorPageView(
                     Modifier
                         .size(18.dp)
                         .padding(3.dp)
-                        .clickable {
-                            navController.navigate(MovieInfoDestination.STAFF_FILMOGRAPHY)
-                        }
+
                 )
             }
         }

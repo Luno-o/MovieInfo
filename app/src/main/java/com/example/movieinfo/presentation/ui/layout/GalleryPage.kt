@@ -44,17 +44,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.GalleryType
-import com.example.movieinfo.entity.MovieGallery
-import com.example.movieinfo.presentation.MainViewModel
+import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
+import com.movieinfo.domain.entity.GalleryType
+import com.movieinfo.domain.entity.MovieGallery
 import kotlinx.coroutines.runBlocking
 
 @Composable
 fun GalleryPageView(
     kpID: String,
-    viewModel: MainViewModel,
+    viewModel: FilmPageViewModel,
     navController: NavController,
-    modifier: Modifier = Modifier,
     innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     var list = emptyList<MovieGallery>()
@@ -67,12 +66,7 @@ fun GalleryPageView(
         mutableIntStateOf(0)
     }
 
-    val tabList = listOf(
-        "Кадры", "Со съемок", "Постеры",
-        "Фан-арты",
-        "Промо", "Концепт-арты",
-        "Обои", "Обложки", "Скриншоты"
-    )
+    val tabList = viewModel.tabListGallery
 
     val additionalInfo = listOfGallery.values.map { it.size.toString() }
 
@@ -122,25 +116,29 @@ fun GalleryPageView(
             GalleryType.WALLPAPER.ordinal -> listOfGallery[GalleryType.WALLPAPER]?.let { list = it }
             GalleryType.CONCEPT.ordinal -> listOfGallery[GalleryType.CONCEPT]?.let { list = it }
             GalleryType.POSTER.ordinal -> listOfGallery[GalleryType.POSTER]?.let { list = it }
-            GalleryType.SCREENSHOT.ordinal -> listOfGallery[GalleryType.SCREENSHOT]?.let { list = it }
+            GalleryType.SCREENSHOT.ordinal -> listOfGallery[GalleryType.SCREENSHOT]?.let {
+                list = it
+            }
+
             GalleryType.STILL.ordinal -> listOfGallery[GalleryType.STILL]?.let { list = it }
-            else-> {}
+            else -> {}
         }
-                LazyVerticalGrid(
-                columns = object : GridCells {
-                    override fun Density.calculateCrossAxisCellSizes(
-                        availableSize: Int,
-                        spacing: Int
-                    ): List<Int> {
-                        val firstColumn = (availableSize - spacing) * 1 / 2
-                        val secondColumn = availableSize - spacing - firstColumn
-                        return listOf(firstColumn, secondColumn)
-                    }
-                },
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(24.dp)
-            ) {if (list.isNotEmpty())
+        LazyVerticalGrid(
+            columns = object : GridCells {
+                override fun Density.calculateCrossAxisCellSizes(
+                    availableSize: Int,
+                    spacing: Int
+                ): List<Int> {
+                    val firstColumn = (availableSize - spacing) * 1 / 2
+                    val secondColumn = availableSize - spacing - firstColumn
+                    return listOf(firstColumn, secondColumn)
+                }
+            },
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(24.dp)
+        ) {
+            if (list.isNotEmpty())
                 list.forEachIndexed { index, item ->
                     if (index % 3 == 0) {
                         item(span = { GridItemSpan(2) }) {
@@ -158,7 +156,7 @@ fun GalleryPageView(
                         }
                     }
                 }
-            }
+        }
     }
 }
 
@@ -223,13 +221,13 @@ fun GalleryTabSection(
                         )
                     tabAddInfo?.let {
                         if (tabAddInfo.isNotEmpty())
-                        Text(
-                            text = it[index],
-                            fontSize = 14.sp,
-                            color = if (selectedTabIndex == index) Color.White else Color.Black.copy(
-                                0.5f
-                            ), modifier = Modifier.padding(start = 8.dp)
-                        )
+                            Text(
+                                text = it[index],
+                                fontSize = 14.sp,
+                                color = if (selectedTabIndex == index) Color.White else Color.Black.copy(
+                                    0.5f
+                                ), modifier = Modifier.padding(start = 8.dp)
+                            )
                     }
                 }
 

@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.example.movieinfo"
-    compileSdk = 34
+    compileSdk = 35
 
     room {
         schemaDirectory("$projectDir/schemas")
@@ -62,7 +62,8 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":domain"))
+    implementation(project(":data"))
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     testImplementation("junit:junit:4.13.2")
@@ -118,8 +119,9 @@ dependencies {
     ksp ("com.google.dagger:hilt-compiler:2.51.1")
     //date time
 implementation("com.jakewharton.threetenabp:threetenabp:1.2.4")
-    implementation ("com.google.accompanist:accompanist-pager:0.24.13-rc")
+    //pager
     implementation ("androidx.paging:paging-compose:3.3.2")
+    implementation ("com.google.accompanist:accompanist-pager:0.24.13-rc")
 
 }
 

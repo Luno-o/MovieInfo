@@ -22,38 +22,37 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.movieinfo.MovieInfoDestination
+import com.example.movieinfo.utils.MovieInfoDestination
 import com.example.movieinfo.R
-import com.example.movieinfo.entity.MovieCollection
-import com.example.movieinfo.entity.CollectionType
-import com.example.movieinfo.presentation.MainViewModel
+import com.example.movieinfo.presentation.ui.viewModels.MainPageViewModel
+import com.example.movieinfo.presentation.ui.viewModels.ProfileViewModel
+import com.movieinfo.domain.entity.MovieCollection
+import com.movieinfo.domain.entity.CollectionType
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import kotlinx.coroutines.flow.StateFlow
 
-@Parcelize
 data class MovieCollectionRow(
-    val movieCards: @RawValue StateFlow<List<MovieCollection>>,
+    val movieCards: StateFlow<List<MovieCollection>>,
     val collectionName: String,
     val movieType: CollectionType
-) : Parcelable
+)
 
 @Composable
 fun MovieCollectionView(
-    viewModel: MainViewModel,
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel? = null,
     flow: StateFlow<List<MovieCollection>>,
     collectionName: String,
     movieType: CollectionType,
     navController: NavController,
-    modifier: Modifier = Modifier,
     kpID: String = "0",
     allOrCount: Boolean = true,
     showOrDelete: Boolean = true
 ) {
 
-    val movieCollection = flow.collectAsState().value
+    val movieCollection = flow.collectAsState().value.take(8)
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -74,7 +73,7 @@ fun MovieCollectionView(
                     .align(Alignment.TopEnd)
                     .padding(end = 16.dp)
                     .clickable {
-                        navController.navigate("${MovieInfoDestination.COLLECTION_ROUTE}/$movieType/$kpID")
+                        navController.navigate("${MovieInfoDestination.COLLECTION_ROUTE}/$movieType/$kpID/$collectionName")
                     },
                 text = stringResource(R.string.All),
                 fontSize = 14.sp,
@@ -91,7 +90,7 @@ fun MovieCollectionView(
             ) {
                 Text(
                     modifier = Modifier.clickable {
-                        navController.navigate("${MovieInfoDestination.COLLECTION_ROUTE}/$movieType/$kpID")
+                        navController.navigate("${MovieInfoDestination.COLLECTION_ROUTE}/$movieType/$kpID/$collectionName")
                     },
                     text = movieCollection.size.toString(),
                     fontSize = 14.sp,
@@ -113,8 +112,8 @@ fun MovieCollectionView(
             if (movieCollection.isNotEmpty()) item {
                 if (showOrDelete) {
                     ShowAllCardView(navController, movieType.name, kpID)
-                } else {
-                    ClearHistoryCardView(viewModel,collectionName)
+                } else if (viewModel !== null) {
+                    ClearHistoryCardView(viewModel, collectionName)
                 }
             }
         }
