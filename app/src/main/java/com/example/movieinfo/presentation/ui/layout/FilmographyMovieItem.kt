@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.sp
 import com.example.movieinfo.utils.convert
 import com.movieinfo.data.repository.storage.models.MovieCollectionImpl
 import com.movieinfo.domain.entity.MovieBaseInfo
+import com.movieinfo.domain.entity.MovieCollection
 
 @Composable
 fun FilmographyMovieItem(
-    movieCard1: MovieCollectionImpl? = null,
-    movieCard2: MovieBaseInfo? = null
+    movieCard: MovieCollection? = null
 ) {
-    val movieCard = movieCard2?.convert() ?: movieCard1
+
     Row(
         modifier = Modifier
             .wrapContentSize()

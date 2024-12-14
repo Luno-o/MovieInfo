@@ -1,5 +1,7 @@
 package com.movieinfo.domain.entity
 
+import kotlinx.coroutines.flow.MutableStateFlow
+
 enum class CollectionType{
     TOP_POPULAR_ALL,
     TOP_POPULAR_MOVIES,
@@ -51,22 +53,6 @@ interface MovieCollection {
     val posterUrl: String?
     val prevPosterUrl: String?
 }
-
-//class MovieCollectionImp(
-//    override val kpID: Int,
-//    override val imdbId: String?,
-//    override val nameRU: String?,
-//    override val nameENG: String?,
-//    override val nameOriginal: String?,
-//    override val countries: List<Country>?,
-//    override val genre: List<Genre>?,
-//    override val raitingKP: Float?,
-//    override val raitingImdb: Float?,
-//    override val year: Int?,
-//    override val type: String?,
-//    override val posterUrl: String?,
-//    override val prevPosterUrl: String?
-//): MovieCollection
 
 enum class MovieType {
     ALL,FILM,TV_SERIES, TV_SHOW, MINI_SERIES,

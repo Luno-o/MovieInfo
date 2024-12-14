@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
@@ -51,7 +52,7 @@ import kotlinx.coroutines.runBlocking
 
 @Composable
 fun SerialPageView(
-    modifier: Modifier = Modifier, viewModel: FilmPageViewModel,
+    modifier: Modifier = Modifier, viewModel: FilmPageViewModel = viewModel(),
     navController: NavController, movieId: Int, innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     var movieIdS by remember { mutableStateOf<Int?>(null) }

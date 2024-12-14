@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
@@ -52,14 +53,13 @@ import kotlinx.coroutines.runBlocking
 @Composable
 fun GalleryPageView(
     kpID: String,
-    viewModel: FilmPageViewModel,
+    viewModel: FilmPageViewModel = viewModel(),
     navController: NavController,
     innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     var list = emptyList<MovieGallery>()
     val listOfGallery = viewModel.movieGalleryAll.collectAsState().value.toMap()
     runBlocking {
-//        viewModel.loadMovieGallery(kpID.toInt())
         viewModel.loadMovieGalleryAll(kpID.toInt())
     }
     var selectedTabIndex by remember {

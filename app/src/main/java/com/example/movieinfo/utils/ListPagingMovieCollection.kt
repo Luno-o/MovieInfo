@@ -25,15 +25,6 @@ class ListPagingMovieCollection(
                 CollectionType.SIMILAR -> {
                     viewModel.loadSimilarMovie(id)
                 }
-
-                CollectionType.PREMIERES -> {
-                    viewModel.loadPremieres(params.key ?: 1)
-                }
-
-                CollectionType.BEST -> {
-                    viewModel.loadPremieres(params.key ?: 1)
-                }
-
                 else -> {
                     viewModel.loadCollectionPaging(params.key ?: 1, collectionType = collectionType)
                 }
@@ -93,10 +84,10 @@ class ListPagingFilterMovieCollection(private val viewModel: SearchPageViewModel
 class ListPagingMovieBaseInfo(
     private val viewModel: SearchPageViewModel,
     private val query: String
-) : PagingSource<Int, MovieBaseInfo>() {
-    override fun getRefreshKey(state: PagingState<Int, MovieBaseInfo>): Int? = null
+) : PagingSource<Int, MovieCollection>() {
+    override fun getRefreshKey(state: PagingState<Int, MovieCollection>): Int? = null
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MovieBaseInfo> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MovieCollection> {
         if (query.isEmpty()) {
             return LoadResult.Page(emptyList(), null, null)
         }

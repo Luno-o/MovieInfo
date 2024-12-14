@@ -1,8 +1,10 @@
 package com.example.movieinfo.di
 
 import com.movieinfo.data.KinopoiskApi
-import com.movieinfo.data.repository.MainPageRepositoryImpl
-import com.movieinfo.domain.repository.MainPageRepository
+import com.movieinfo.data.repository.MainMovieRepositoryImpl
+import com.movieinfo.data.repository.storage.MovieStorage
+import com.movieinfo.data.repository.storage.MovieStorageImpl
+import com.movieinfo.domain.repository.MainMovieRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,8 +17,13 @@ class DataModule {
 
 @Provides
 @Singleton
-fun provideMovieRepository(api: KinopoiskApi): MainPageRepository{
-return MainPageRepositoryImpl(api)
+fun provideMovieRepository(api: KinopoiskApi,movieStorage: MovieStorage): MainMovieRepository{
+return MainMovieRepositoryImpl(movieStorage,api)
 }
+    @Provides
+    @Singleton
+    fun provideMovieStorage():MovieStorage{
+        return MovieStorageImpl()
+    }
 
 }

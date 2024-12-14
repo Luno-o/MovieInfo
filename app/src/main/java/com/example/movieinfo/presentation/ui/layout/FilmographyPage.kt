@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.ActorViewModel
@@ -38,7 +39,7 @@ import com.movieinfo.data.repository.storage.models.MovieCollectionImpl
 
 @Composable
 fun FilmographyPageView(
-    viewModel: ActorViewModel,
+    viewModel: ActorViewModel = viewModel(),
     navController: NavController
 ) {
     val listMovieBaseInfo: Map<MovieCollectionImpl, String?> =
@@ -140,7 +141,7 @@ fun FilmographyPageView(
         LazyColumn(modifier = Modifier.padding(top = 16.dp, start = 8.dp)) {
             listOfMovie.forEachIndexed { index, movieCollection ->
                 item {
-                    FilmographyMovieItem(movieCard1 = movieCollection)
+                    FilmographyMovieItem(movieCard = movieCollection)
                 }
             }
         }

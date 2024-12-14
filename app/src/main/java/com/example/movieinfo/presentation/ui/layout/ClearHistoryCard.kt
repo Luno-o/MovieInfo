@@ -14,11 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.ProfileViewModel
 
 @Composable
-fun ClearHistoryCardView(profileViewModel: ProfileViewModel, collectionName: String) {
+fun ClearHistoryCardView(profileViewModel: ProfileViewModel = viewModel(), collectionName: String) {
     Box(modifier = Modifier.size(111.dp, 156.dp)) {
         Box(
             modifier = Modifier

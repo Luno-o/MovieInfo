@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -50,6 +51,8 @@ import com.example.movieinfo.R
 import com.movieinfo.domain.entity.MovieBaseInfo
 import com.example.movieinfo.presentation.ui.viewModels.SearchPageViewModel
 import com.example.movieinfo.utils.MovieInfoDestination
+import com.movieinfo.data.repository.storage.models.MovieCollectionImpl
+import com.movieinfo.domain.entity.MovieCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -62,7 +65,7 @@ fun SearchPageView(
 ) {
 
 
-    val movies: LazyPagingItems<MovieBaseInfo> =
+    val movies: LazyPagingItems<MovieCollection> =
         viewModel.movieSearchResult.collectAsLazyPagingItems()
 
     Column(
@@ -76,7 +79,7 @@ fun SearchPageView(
             LazyColumn(modifier.padding(horizontal = 16.dp)) {
                 items(movies.itemCount) {
                     movies[it]?.let { it1 ->
-                        FilmographyMovieItem(movieCard2 = movies[it])
+                        FilmographyMovieItem(movieCard = movies[it])
                     }
                 }
                 movies.apply {
@@ -131,14 +134,6 @@ fun SearchPageView(
             text = stringResource(R.string.not_found),
             fontSize = 16.sp, modifier = Modifier.padding(16.dp), textAlign = TextAlign.Center
         )
-//        if (baseInfoList.isNotEmpty()){
-//            LazyColumn (modifier.padding(horizontal = 16.dp)){
-//                items(baseInfoList.size){
-//                    FilmographyMovieItem(movieCard2 = baseInfoList[it])
-//                }
-//            }
-//        }else Text(text = stringResource(R.string.not_found),
-//            fontSize = 16.sp, modifier = Modifier.padding(16.dp), textAlign = TextAlign.Center)
     }
 }
 

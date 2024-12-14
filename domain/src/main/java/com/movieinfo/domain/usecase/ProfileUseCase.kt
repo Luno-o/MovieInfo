@@ -1,39 +1,45 @@
 package com.movieinfo.domain.usecase
 
-import com.movieinfo.domain.entity.MovieCollection
 import com.movieinfo.domain.entity.MovieDb
 import com.movieinfo.domain.entity.MyMovieCollections
-import com.movieinfo.domain.repository.MainPageRepository
-import kotlinx.coroutines.flow.Flow
+import com.movieinfo.domain.repository.MainMovieRepository
 import javax.inject.Inject
 
-class ProfileUseCase @Inject constructor (private val mainPageRepository: MainPageRepository) {
+class GetMyCollectionsUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
 
-    suspend fun addCollection(name: String) {
-        mainPageRepository.addCollection(name)
+    suspend fun execute(): List<MyMovieCollections> {
+        return mainMovieRepository.getMyCollections()
     }
-    suspend fun getCollectionById(collectionId: Int):List<MovieDb>{
-        return    mainPageRepository.getCollectionByName(collectionId)
+}
+
+class AddCollectionUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
+    suspend fun execute(name: String) {
+        mainMovieRepository.addCollection(name)
     }
-    suspend fun getAllCollections(): List<MovieDb>{
-        return mainPageRepository.getAllCollections()
+}
+
+class GetCollectionByNameUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
+    suspend fun execute(name: String): List<MovieDb> {
+        val id = mainMovieRepository.getMyCollections().find { it.collectionName == name }?.id
+        return if (id != null) {
+            mainMovieRepository.getCollectionById(id)
+        } else {
+            emptyList()
+        }
     }
-    suspend fun getCollectionByIdFlow(collectionId: Int): Flow<List<MovieDb>> {
-        return    mainPageRepository.getCollectionByNameFlow(collectionId)
-    }
-    suspend fun getCollectionsName(): List<MyMovieCollections>{
-        return mainPageRepository.getMyCollections()
-    }
-    suspend fun deleteHistory(collectionId: Int){
-        val collection =  mainPageRepository.getCollectionByName(collectionId)
-        collection.forEach { movie->
-            if (movie.collectionId.size == 1){
-                mainPageRepository.removeMovie(movie)
-            }else{
-                val newCollection : MutableList<Int> = mutableListOf()
+}
+
+class DeleteHistoryUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
+    suspend fun execute(collectionId: Int) {
+        val collection = mainMovieRepository.getCollectionById(collectionId)
+        collection.forEach { movie ->
+            if (movie.collectionId.size == 1) {
+                mainMovieRepository.removeMovie(movie)
+            } else {
+                val newCollection: MutableList<Int> = mutableListOf()
                 newCollection.addAll(movie.collectionId)
                 newCollection.remove(collectionId)
-                mainPageRepository.updateMovie(movie.copy(collectionId = newCollection))
+                mainMovieRepository.updateMovie(movie.copy(collectionId = newCollection))
             }
         }
 

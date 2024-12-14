@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.movieinfo.domain.entity.Episode
@@ -43,9 +44,9 @@ import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
 
 @Composable
 fun SeasonsPageView(
-    viewModel: FilmPageViewModel,
-    navController: NavController,
     modifier: Modifier = Modifier,
+    viewModel: FilmPageViewModel = viewModel(),
+    navController: NavController,
     innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     var selectedTabIndex by remember {

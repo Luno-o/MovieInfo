@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.ActorViewModel
@@ -37,9 +38,10 @@ import kotlinx.coroutines.runBlocking
 
 @Composable
 fun ActorPageView(
-    viewModel: ActorViewModel,
+    modifier: Modifier = Modifier,
+    viewModel: ActorViewModel = viewModel(),
     navController: NavController,
-    modifier: Modifier = Modifier, staffID: String,
+    staffID: String,
     innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val scrollState = rememberScrollState()

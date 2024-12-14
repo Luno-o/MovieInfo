@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -170,7 +171,6 @@ fun ShowCollectionView(
 
                         collectionNameState = collectionName
                         if (collectionName != null) {
-                            viewModel.getCollectionsList()
                             viewModel.getCollectionByNameFlow(collectionName)
                         }
                     }

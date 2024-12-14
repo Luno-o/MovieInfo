@@ -3,16 +3,22 @@ package com.example.movieinfo.presentation.ui.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.movieinfo.utils.movieDBToMovieCollection
 import com.movieinfo.domain.entity.GalleryType
 import com.movieinfo.domain.entity.MovieBaseInfo
 import com.movieinfo.domain.entity.MovieCollection
-import com.movieinfo.domain.entity.MovieDb
 import com.movieinfo.domain.entity.MovieGallery
 import com.movieinfo.domain.entity.MyMovieCollections
 import com.movieinfo.domain.entity.SerialWrapper
 import com.movieinfo.domain.entity.Staff
-import com.movieinfo.domain.usecase.FilmPageUseCase
+import com.movieinfo.domain.usecase.AddToMyCollectionUseCase
+import com.movieinfo.domain.usecase.GetCollectionByNameUseCase
+import com.movieinfo.domain.usecase.GetFilmUseCase
+import com.movieinfo.domain.usecase.GetMovieCollectionsIdUseCase
+import com.movieinfo.domain.usecase.GetMovieGalleryUseCase
+import com.movieinfo.domain.usecase.GetMyCollectionsUseCase
+import com.movieinfo.domain.usecase.GetSeasonsUseCase
+import com.movieinfo.domain.usecase.GetSimilarCollectionUseCase
+import com.movieinfo.domain.usecase.GetStaffByFilmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -21,16 +27,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class FilmPageViewModel @Inject constructor(private val useCase: FilmPageUseCase) : ViewModel() {
+class FilmPageViewModel @Inject constructor(
+    private val getFilmUseCase: GetFilmUseCase,
+    private val getSeasonsUseCase: GetSeasonsUseCase,
+    private val getMovieCollectionsIdUseCase: GetMovieCollectionsIdUseCase,
+    private val getStaffByFilmUseCase: GetStaffByFilmUseCase,
+    private val getMovieGalleryUseCase: GetMovieGalleryUseCase,
+    private val addToMyCollectionUseCase: AddToMyCollectionUseCase,
+    private val getMyCollectionsUseCase: GetMyCollectionsUseCase,
+    private val getCollectionByNameUseCase: GetCollectionByNameUseCase,
+    private val getSimilarCollectionUseCase: GetSimilarCollectionUseCase
+) : ViewModel() {
 
     private val _movie = MutableStateFlow<MovieBaseInfo?>(null)
     val movie = _movie.asStateFlow()
     private val _seasons = MutableStateFlow<List<SerialWrapper>>(listOf())
     val seasons = _seasons.asStateFlow()
-    private val _movieToBase = MutableStateFlow<MovieBaseInfo?>(null)
+
     private val _staffByFilm = MutableStateFlow<List<Staff>>(emptyList())
     val staffByFilm = _staffByFilm.asStateFlow()
     private val _movieGallery = MutableStateFlow<List<MovieGallery>>(emptyList())
@@ -46,11 +63,10 @@ class FilmPageViewModel @Inject constructor(private val useCase: FilmPageUseCase
     private val _movieGalleryAll =
         MutableStateFlow<List<Pair<GalleryType, List<MovieGallery>>>>(emptyList())
     val movieGalleryAll = _movieGalleryAll.asStateFlow()
-    private val _yourCollection = MutableStateFlow<List<MovieCollection>>(emptyList())
 
     private suspend fun getCollectionsList() {
         val deferred = viewModelScope.async {
-            useCase.getCollectionsName()
+            getMyCollectionsUseCase.execute()
         }.await()
         collectionsList.value = deferred
         loadYourCollections(deferred)
@@ -59,19 +75,19 @@ class FilmPageViewModel @Inject constructor(private val useCase: FilmPageUseCase
     private suspend fun loadYourCollections(list: List<MyMovieCollections>) {
         val fullList = mutableListOf<List<MovieCollection>>()
         list.forEach { myCollection ->
-            fullList.add(useCase.getCollectionById(myCollection.id))
+            fullList.add(getCollectionByNameUseCase.execute(myCollection.collectionName))
         }
         _yourCollections.value = fullList
     }
 
     suspend fun loadSeasons(id: Int) {
         viewModelScope.launch {
-            _seasons.value = useCase.getSeasons(id)
+            _seasons.value = getSeasonsUseCase.execute(id)
         }
     }
 
     suspend fun getCollectionsIdForMovie(kpId: Int) {
-        collectionsIdForMovie.value = useCase.getMovieCollectionsId(kpId)
+        collectionsIdForMovie.value = getMovieCollectionsIdUseCase.execute(kpId)
         checkMyFavourite()
         checkMyWatched()
         checkMyBookmark()
@@ -110,19 +126,19 @@ class FilmPageViewModel @Inject constructor(private val useCase: FilmPageUseCase
 
     suspend fun loadMovieById(id: Int) {
         viewModelScope.launch {
-            _movie.value = useCase.getMovieById(id)
+            _movie.value = getFilmUseCase.execute(id)
         }
     }
 
     suspend fun loadStaffByFilmId(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            _staffByFilm.value = useCase.getStaffByFilmId(id)
+            _staffByFilm.value = getStaffByFilmUseCase.execute(id)
         }
     }
 
     suspend fun loadMovieGallery(id: Int, galleryType: GalleryType = GalleryType.SHOOTING) {
         viewModelScope.launch(Dispatchers.IO) {
-            _movieGallery.value = useCase.getMovieGallery(id, galleryType)
+            _movieGallery.value = getMovieGalleryUseCase.execute(id, galleryType)
         }
     }
 
@@ -130,7 +146,7 @@ class FilmPageViewModel @Inject constructor(private val useCase: FilmPageUseCase
         val list = mutableListOf<Pair<GalleryType, List<MovieGallery>>>()
         viewModelScope.launch(Dispatchers.IO) {
             GalleryType.entries.forEach { galleryType ->
-                list.add(Pair(galleryType, useCase.getMovieGallery(id, galleryType)))
+                list.add(Pair(galleryType, getMovieGalleryUseCase.execute(id, galleryType)))
                 delay(100)
             }
             _movieGalleryAll.value = list
@@ -140,86 +156,20 @@ class FilmPageViewModel @Inject constructor(private val useCase: FilmPageUseCase
 
     suspend fun loadSimilarMovie(id: Int) {
         viewModelScope.launch {
-            _similarMovies.value = useCase.getSimilarMovie(id)
+            _similarMovies.value = getSimilarCollectionUseCase.execute(id)
         }
     }
 
-    fun addToMyCollection(id: Int) {
+    fun addRemoveToMyCollection(id: Int) {
         viewModelScope.launch {
-            _movieToBase.value = _movie.value
-            val newCollectionList = mutableListOf<Int>()
-            val movieToCollection =
-                _movieToBase.value?.let {
-                    useCase.getMovieFromDB(_movieToBase.value!!.kpID)
-                        ?.let { movieDb ->
-                            if (!movieDb.collectionId.contains(id)) {
-                                if (movieDb.collectionId.isNotEmpty()) {
-                                    newCollectionList.addAll(movieDb.collectionId)
-                                }
-                                newCollectionList.add(id)
-                            }
-
-                        }
-                    updateMovieDb(newCollectionList, it)
-                }
-            if (movieToCollection != null) {
-                useCase.addToCollection(movieToCollection)
-                movie.value?.let { getCollectionsIdForMovie(it.kpID) }
+                addToMyCollectionUseCase.execute(_movie.value,id)
+                _movie.value?.let { getCollectionsIdForMovie(it.kpID) }
                 getCollectionsList()
+            Timber.d(" ViewModel add to collection film ${_movie.value?.nameRU} collection id $id " +
+                    " collections id ${collectionsIdForMovie.value}")
             }
-
         }
-    }
 
-    fun removeFromMyCollection(id: Int) {
-        viewModelScope.launch {
-            _movieToBase.value = _movie.value
-            val newCollectionList = mutableListOf<Int>()
-            val movieToCollection =
-                _movieToBase.value?.let {
-                    useCase.getMovieFromDB(_movieToBase.value!!.kpID)
-                        ?.let { movieDb ->
-                            if (movieDb.collectionId.isNotEmpty()) {
-                                newCollectionList.addAll(movieDb.collectionId)
-                            }
-                        }
-                    if (newCollectionList.contains(id)) newCollectionList.remove(id)
-                    updateMovieDb(newCollectionList, it)
-                }
-            if (movieToCollection != null) {
-                useCase.addToCollection(movieToCollection)
-                movie.value?.let { getCollectionsIdForMovie(it.kpID) }
-                getCollectionsList()
-                val newColl = mutableListOf<MovieCollection>()
-                newColl.addAll(_yourCollection.value)
-                newColl.remove(movieDBToMovieCollection(movieToCollection))
-                _yourCollection.value = newColl
-            }
-
-        }
-    }
-
-    private fun updateMovieDb(
-        collectionId: List<Int>,
-        movieBaseInfo: MovieBaseInfo
-    ): MovieDb {
-        return MovieDb(
-            collectionId = collectionId,
-            posterUrl = movieBaseInfo.posterUrl,
-            prevPosterUrl = movieBaseInfo.prevPosterUrl,
-            countries = movieBaseInfo.countries,
-            genre = movieBaseInfo.genres,
-            kpID = movieBaseInfo.kpID,
-            imdbId = movieBaseInfo.ImdbId,
-            nameRU = movieBaseInfo.nameRU,
-            nameENG = movieBaseInfo.nameENG,
-            nameOriginal = movieBaseInfo.nameOriginal,
-            raitingKP = movieBaseInfo.ratingKinopoisk,
-            raitingImdb = movieBaseInfo.ratingImdb,
-            year = movieBaseInfo.year,
-            type = movieBaseInfo.type
-        )
-    }
 
     val tabListGallery = listOf(
         "Кадры", "Со съемок", "Постеры",
@@ -230,11 +180,27 @@ class FilmPageViewModel @Inject constructor(private val useCase: FilmPageUseCase
 
     companion object {
         fun provideFactory(
-            useCase: FilmPageUseCase
+             getFilmUseCase: GetFilmUseCase,
+            getSeasonsUseCase: GetSeasonsUseCase,
+            getMovieCollectionsIdUseCase: GetMovieCollectionsIdUseCase,
+            getStaffByFilmUseCase: GetStaffByFilmUseCase,
+             getMovieGalleryUseCase: GetMovieGalleryUseCase,
+             addToMyCollectionUseCase: AddToMyCollectionUseCase,
+            getMyCollectionsUseCase: GetMyCollectionsUseCase,
+            getCollectionByNameUseCase: GetCollectionByNameUseCase,
+            getSimilarCollectionUseCase: GetSimilarCollectionUseCase
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return FilmPageViewModel(useCase) as T
+                return FilmPageViewModel(        getFilmUseCase,
+                    getSeasonsUseCase,
+                    getMovieCollectionsIdUseCase,
+                    getStaffByFilmUseCase,
+                    getMovieGalleryUseCase,
+                    addToMyCollectionUseCase,
+                    getMyCollectionsUseCase,
+                    getCollectionByNameUseCase,
+                    getSimilarCollectionUseCase) as T
             }
         }
     }

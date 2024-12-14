@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.MainPageViewModel
@@ -29,9 +30,9 @@ import timber.log.Timber
 
 @Composable
 fun MainPageView(
+    modifier: Modifier = Modifier,
     viewModel: MainPageViewModel,
     navController: NavController,
-    modifier: Modifier = Modifier,
     innerPadding: PaddingValues = PaddingValues(0.dp),
     state: LazyListState = rememberLazyListState()
 ) {
@@ -57,8 +58,6 @@ fun MainPageView(
                     movieType = collections[it].movieType,
                     navController = navController
                 )
-
-
             }
             item {
                 Spacer(
@@ -70,13 +69,4 @@ fun MainPageView(
         }
 
     }
-//    runBlocking {
-//        viewModel.viewModelScope.launch(Dispatchers.IO) {
-//            Timber.d("MainPage load pages")
-//            viewModel.loadPremieres()
-//            viewModel.loadCollectionTopPopularAll()
-//            viewModel.loadCollectionComicsTheme()
-//            viewModel.loadCollectionTopPopularMovies()
-//        }
-//    }
 }

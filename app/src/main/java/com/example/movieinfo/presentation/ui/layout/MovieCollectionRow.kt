@@ -32,6 +32,7 @@ import com.movieinfo.domain.entity.CollectionType
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 data class MovieCollectionRow(
     val movieCards: StateFlow<List<MovieCollection>>,
@@ -108,10 +109,11 @@ fun MovieCollectionView(
         LazyRow(modifier = Modifier.align(Alignment.BottomCenter)) {
             items(movieCollection.size) {
                 MovieCardView(movieCard = movieCollection[it], navController)
+                Timber.d("movie type ${movieCollection[it].type}")
             }
             if (movieCollection.isNotEmpty()) item {
                 if (showOrDelete) {
-                    ShowAllCardView(navController, movieType.name, kpID)
+                    ShowAllCardView(navController, movieType.name, kpID,collectionName)
                 } else if (viewModel !== null) {
                     ClearHistoryCardView(viewModel, collectionName)
                 }

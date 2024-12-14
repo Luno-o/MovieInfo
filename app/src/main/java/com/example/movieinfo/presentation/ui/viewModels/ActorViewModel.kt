@@ -30,7 +30,7 @@ class ActorViewModel @Inject constructor(private val useCase: ActorUseCase) : Vi
 
     suspend fun loadStaffById(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            _staff.value = useCase.loadStaffFullInfoById(id)
+            _staff.value = useCase.execute(id)
 
             val movieCollection = _staff.value.films.associate { film ->
                 Pair(

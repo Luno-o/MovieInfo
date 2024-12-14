@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.SearchPageViewModel
@@ -44,7 +45,7 @@ import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
 @Composable
-fun PeriodPageView(viewModel: SearchPageViewModel, navController: NavController) {
+fun PeriodPageView(viewModel: SearchPageViewModel = viewModel(), navController: NavController) {
     val period = viewModel.yearRange
     val years = (1998..Calendar.getInstance().get(Calendar.YEAR)).toList()
     Column(

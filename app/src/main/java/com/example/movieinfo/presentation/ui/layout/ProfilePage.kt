@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.movieinfo.domain.entity.CollectionType
@@ -59,7 +60,7 @@ import timber.log.Timber
 
 @Composable
 fun ProfilePageView(
-    viewModel: ProfileViewModel,
+    viewModel: ProfileViewModel = viewModel(),
     navController: NavController
 ) {
     val scrollState = rememberScrollState()

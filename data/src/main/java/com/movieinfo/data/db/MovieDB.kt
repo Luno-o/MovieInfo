@@ -8,8 +8,9 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.movieinfo.data.repository.storage.models.MyCollections
+import com.movieinfo.data.repository.storage.models.MyMovieDb
 import com.movieinfo.domain.entity.MovieType
-import com.movieinfo.domain.entity.MyMovieCollections
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 
@@ -27,8 +28,8 @@ object MovieDbContracts {
         const val NAME_OR = "nameOriginal"
         const val COUNTRIES = "countries"
         const val GENRES = "genreDtos"
-        const val RAIT_KP = "raitingKP"
-        const val RAIT_IMDB = "raitingImdb"
+        const val RAT_KP = "raitingKP"
+        const val RAT_IMDB = "raitingImdb"
         const val YEAR = "year"
         const val TYPE = "type"
         const val POSTER_URL = "posterUrl"
@@ -74,53 +75,53 @@ data class MyMovieCollectionsDb(
     override val id: Int,
     @ColumnInfo(name = MovieDbContracts.Columns.COLLECTION_NAME)
     override val collectionName: String
-): MyMovieCollections
+) : MyCollections
 
 @Entity(tableName = MovieDbContracts.TABLE_NAME)
 @TypeConverters(MovieTypeConverter::class)
 data class MovieCollectionDB(
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = MovieDbContracts.Columns.KP_ID)
-     val kpID: Int,
+    override val kpID: Int,
 //    @ColumnInfo(name = MovieDbContracts.Columns.IMDB_ID)
 
-     val imdbId: String?,
+    override val imdbId: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.NAME_RU)
 
-     val nameRU: String?,
+    override val nameRU: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.NAME_ENG)
 
-     val nameENG: String?,
+    override val nameENG: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.NAME_OR)
 
-     val nameOriginal: String?,
+    override val nameOriginal: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.COUNTRIES)
 
-     val countries: String?,
+    override val countries: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.GENRES)
 
-     val genreDtos: String?,
+    override val genre: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.RAIT_KP)
 
-     val raitingKP: Float?,
+    override val ratingKP: Float?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.RAIT_IMDB)
 
-     val raitingImdb: Float?,
+    override val ratingImdb: Float?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.YEAR)
 
-     val year: Int?,
+    override val year: Int?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.TYPE)
 
-     val type: String?,
+    override val type: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.POSTER_URL)
 
-     val posterUrl: String?,
+    override val posterUrl: String?,
 //    @ColumnInfo(name = MovieDbContracts.Columns.PREV_POSTER)
 
-     val prevPosterUrl: String?,
+    override val prevPosterUrl: String?,
     @ColumnInfo(name = MovieDbContracts.Columns.COLLECTION_ID)
-    val collectionId: List<Int>
-)
+    override val collectionId: List<Int>
+):MyMovieDb
 
 
 data class MoviesByCollectionId(

@@ -24,12 +24,12 @@ import com.example.movieinfo.R
 
 
 @Composable
-fun ShowAllCardView(navController: NavController, movieType: String?, kpID: String? = "0") {
+fun ShowAllCardView(navController: NavController, movieType: String?, kpID: String? = "0",collectionsName : String) {
 
     Box(modifier = Modifier
         .size(111.dp, 156.dp)
         .clickable {
-            navController.navigate("${MovieInfoDestination.COLLECTION_ROUTE}/$movieType/$kpID")
+            navController.navigate("${MovieInfoDestination.COLLECTION_ROUTE}/$movieType/$kpID/$collectionsName")
         }) {
         Box(
             modifier = Modifier

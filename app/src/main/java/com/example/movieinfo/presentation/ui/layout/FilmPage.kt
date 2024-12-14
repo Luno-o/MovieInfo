@@ -47,18 +47,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
-import com.example.movieinfo.presentation.ui.viewModels.ShowCollectionViewModel
 import com.example.movieinfo.utils.MovieInfoDestination
-import com.movieinfo.domain.entity.MovieGalleryImpl
 import com.movieinfo.domain.entity.CollectionType
 import com.movieinfo.domain.entity.MovieGallery
 import com.movieinfo.domain.entity.Staff
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
@@ -271,13 +269,7 @@ fun ToolRow(viewModel: FilmPageViewModel) {
             val favId =
                 viewModel.collectionsList.value.find { it.collectionName == "Избранное" }?.id
             favId?.let {
-                if (collectionsId.contains(favId)) {
-                    viewModel.removeFromMyCollection(favId)
-                } else
-                    viewModel.addToMyCollection(
-                        it
-                    )
-            }
+                    viewModel.addRemoveToMyCollection(favId)}
         }, modifier = Modifier.size(34.dp)
         ) {
             Icon(
@@ -293,14 +285,7 @@ fun ToolRow(viewModel: FilmPageViewModel) {
                 val bkmrkId =
                     viewModel.collectionsList.value.find { it.collectionName == "Закладки" }?.id
                 bkmrkId?.let {
-                    if (collectionsId.contains(bkmrkId)) {
-                        viewModel.removeFromMyCollection(bkmrkId)
-
-                    } else {
-                        viewModel.addToMyCollection(
-                            it
-                        )
-                    }
+                        viewModel.addRemoveToMyCollection(bkmrkId)
                 }
             },
             modifier = Modifier.size(34.dp)
@@ -318,13 +303,7 @@ fun ToolRow(viewModel: FilmPageViewModel) {
                 val wtchdId =
                     viewModel.collectionsList.value.find { it.collectionName == "Просмотрено" }?.id
                 wtchdId?.let {
-                    if (collectionsId.contains(wtchdId)) {
-                        viewModel.removeFromMyCollection(wtchdId)
-                    } else {
-                        viewModel.addToMyCollection(
-                            it
-                        )
-                    }
+                        viewModel.addRemoveToMyCollection(wtchdId)
                 }
             },
             modifier = Modifier.size(34.dp)

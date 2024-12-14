@@ -39,15 +39,15 @@ fun ContainerScreen(
             BottomTabSection(tabIndex = tabIndex) {
                 when (it) {
                     0 -> {
-                        actions.navigateToHome
+                        navController.navigate(MovieInfoDestination.HOME_ROUTE)
                     }
 
                     1 -> {
-                        actions.navigateToSearch
+                        navController.navigate(MovieInfoDestination.SEARCH)
                     }
 
                     2 -> {
-                        actions.navigateToProfile
+                        navController.navigate(MovieInfoDestination.PROFILE)
                     }
                 }
             }

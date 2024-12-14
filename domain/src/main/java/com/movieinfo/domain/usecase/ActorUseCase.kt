@@ -1,14 +1,13 @@
 package com.movieinfo.domain.usecase
 
 import com.movieinfo.domain.entity.StaffFullInfo
-import com.movieinfo.domain.repository.MainPageRepository
+import com.movieinfo.domain.repository.MainMovieRepository
 import javax.inject.Inject
 
-class ActorUseCase @Inject constructor(private val mainPageRepository: MainPageRepository) {
+class ActorUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
 
-
-    suspend fun loadStaffFullInfoById(id: Int): StaffFullInfo{
-        return mainPageRepository.loadStaffById(id)
+    suspend fun execute(id: Int): StaffFullInfo{
+        return mainMovieRepository.loadStaffById(id)
     }
 
 }

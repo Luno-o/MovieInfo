@@ -1,9 +1,8 @@
 package com.example.movieinfo.utils
 
-import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
-
 object MovieInfoDestination {
+    const val DETAIL_MOVIE_PARENT: String = "detailmovieparent"
+    const val DETAIL_STAFF_PARENT: String = "detailstaffparent"
     const val ON_BOARDING: String = "onboarding"
     const val HOME_ROUTE = "mainPage"
     const val COLLECTION_ROUTE = "collections"
@@ -14,6 +13,7 @@ object MovieInfoDestination {
     const val MOVIE_GALLERY = "movieGallery"
     const val STAFF_FILMOGRAPHY = "staffFilmography"
     const val SEARCH = "search"
+    const val SEARCH_PARENT = "searchparent"
     const val SEARCH_FILTER = "searchfilter"
     const val FILTER_COUNTRY = "searchcountry"
     const val FILTER_GENRE = "searchgenre"

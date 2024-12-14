@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.movieinfo.domain.entity.MovieCollection
 import com.movieinfo.domain.entity.MovieDb
 import com.movieinfo.domain.entity.MyMovieCollections
-import com.movieinfo.domain.usecase.ProfileUseCase
+import com.movieinfo.domain.usecase.AddCollectionUseCase
+import com.movieinfo.domain.usecase.DeleteHistoryUseCase
+import com.movieinfo.domain.usecase.GetCollectionByNameUseCase
+import com.movieinfo.domain.usecase.GetMyCollectionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -19,9 +22,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val useCase: ProfileUseCase
+    private val getCollectionByNameUseCase: GetCollectionByNameUseCase,
+    private val addCollectionUseCase: AddCollectionUseCase,
+    private val getMyCollectionsUseCase: GetMyCollectionsUseCase,
+    private val clearHistoryUseCase: DeleteHistoryUseCase
 ) : ViewModel() {
-    var collectionsList = MutableStateFlow(emptyList<MyMovieCollections>())
+
+    private val _collectionsList = MutableStateFlow(emptyList<MyMovieCollections>())
+    var collectionsList = _collectionsList.asStateFlow()
 
     private val _yourCollections = MutableStateFlow<List<List<MovieCollection>>>(emptyList())
     val yourCollections = _yourCollections.asStateFlow()
@@ -34,55 +42,45 @@ class ProfileViewModel @Inject constructor(
 
     fun addCollection(text: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            useCase.addCollection(text)
+            addCollectionUseCase.execute(text)
             getCollectionsList()
         }
     }
 
-    suspend fun loadWatchedMovie() {
+    private suspend fun loadWatchedMovie() {
         viewModelScope.launch {
-            val id = collectionsList.value.find { it.collectionName == "Просмотрено" }?.id
-            if (id != null) {
-                _watchedMovie.value = useCase.getCollectionById(id)
-            }
+                _watchedMovie.value = getCollectionByNameUseCase.execute("Просмотрено")
         }
     }
 
-    suspend fun loadYourInterestMovie() {
+    private suspend fun loadYourInterestMovie() {
         viewModelScope.launch {
-            val id = collectionsList.value.find { it.collectionName == "Вам было интересно" }?.id
-            if (id != null) {
-                _yourInterest.value = useCase.getCollectionById(id)
-            }
+                _yourInterest.value = getCollectionByNameUseCase.execute("Вам было интересно")
         }
     }
 
-    suspend fun loadYourCollections(list: List<MyMovieCollections>) {
+    private suspend fun loadYourCollections(list: List<MyMovieCollections>) {
         val fullList = mutableListOf<List<MovieCollection>>()
         list.forEach { myCollection ->
-            fullList.add(useCase.getCollectionById(myCollection.id))
+            fullList.add(getCollectionByNameUseCase.execute(myCollection.collectionName))
         }
         _yourCollections.value = fullList
     }
 
-    suspend fun getAllCollections() {
-        useCase.getAllCollections()
 
-    }
-
-    suspend fun getCollectionsList() {
+    private suspend fun getCollectionsList() {
         val deferred = viewModelScope.async {
-            useCase.getCollectionsName()
+            getMyCollectionsUseCase.execute()
         }.await()
-        collectionsList.value = deferred
+        _collectionsList.value = deferred
         loadYourCollections(deferred)
     }
 
     fun clearHistory(name: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val id = collectionsList.value.find { it.collectionName == name }?.id
+            val id = _collectionsList.value.find { it.collectionName == name }?.id
             if (id != null) {
-                useCase.deleteHistory(id)
+                clearHistoryUseCase.execute(id)
                 Timber.d("deleteCollectionById $id")
                 getCollectionsList()
             }
@@ -93,8 +91,8 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            getAllCollections()
-            if (collectionsList.value.size < 4) {
+
+            if (_collectionsList.value.size < 4) {
                 this.let {
                     addCollection("Избранное")
                     addCollection("Закладки")
@@ -107,7 +105,7 @@ class ProfileViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 if (_yourCollections.value.isEmpty()) {
                     getCollectionsList()
-                    loadYourCollections(collectionsList.value)
+                    loadYourCollections(_collectionsList.value)
                 }
                 loadYourInterestMovie()
                 loadWatchedMovie()
@@ -117,11 +115,17 @@ class ProfileViewModel @Inject constructor(
 
     companion object {
         fun provideFactory(
-            useCase: ProfileUseCase
+            getCollectionByNameUseCase: GetCollectionByNameUseCase,
+            addCollectionUseCase: AddCollectionUseCase,
+            getMyCollectionsUseCase: GetMyCollectionsUseCase,
+            clearHistoryUseCase: DeleteHistoryUseCase
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ProfileViewModel(useCase) as T
+                return ProfileViewModel(getCollectionByNameUseCase,
+                    addCollectionUseCase,
+                    getMyCollectionsUseCase,
+                    clearHistoryUseCase) as T
             }
         }
     }

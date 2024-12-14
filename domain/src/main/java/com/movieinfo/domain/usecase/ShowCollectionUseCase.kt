@@ -3,28 +3,38 @@ package com.movieinfo.domain.usecase
 import com.movieinfo.domain.entity.CollectionType
 import com.movieinfo.domain.entity.MovieCollection
 import com.movieinfo.domain.entity.MovieDb
-import com.movieinfo.domain.entity.MyMovieCollections
-import com.movieinfo.domain.repository.MainPageRepository
+import com.movieinfo.domain.repository.MainMovieRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class ShowCollectionUseCase @Inject constructor(private val mainPageRepository: MainPageRepository) {
-    suspend fun getCollection(type: CollectionType, page: Int = 1): List<MovieCollection>{
-        return mainPageRepository.getCollection(type,page)
+class ShowCollectionUseCase
+@Inject constructor(
+    private val mainMovieRepository: MainMovieRepository
+) {
+    suspend fun execute(type: CollectionType, page: Int = 1): List<MovieCollection> {
+        return mainMovieRepository.loadCollection(type, page) ?: emptyList()
     }
-    suspend fun getPremieres(page: Int): List<MovieCollection>{
-        return mainPageRepository.getPremiers(page)
+
+}
+
+class GetSimilarCollectionUseCase
+@Inject constructor(
+    private val mainMovieRepository: MainMovieRepository
+) {
+    suspend fun execute(id: Int): List<MovieCollection> {
+        return mainMovieRepository.getSimilarMovie(id)
     }
-    suspend fun getSimilarMovie(id: Int): List<MovieCollection>{
-        return mainPageRepository.getSimilarMovie(id)
-    }
-    suspend fun getCollectionByIdFlow(collectionId: Int): Flow<List<MovieDb>> {
-        return    mainPageRepository.getCollectionByNameFlow(collectionId)
-    }
-    suspend fun getCollectionById(collectionId: Int):List<MovieCollection>{
-        return    mainPageRepository.getCollectionByName(collectionId)
-    }
-    suspend fun getCollectionsName(): List<MyMovieCollections>{
-        return mainPageRepository.getMyCollections()
+}
+
+class ShowMyCollectionFlowUseCase
+@Inject constructor(
+    private val mainMovieRepository: MainMovieRepository
+) {
+    suspend fun execute(name: String): Flow<List<MovieDb>> {
+        val id = mainMovieRepository.getMyCollections().find { it.collectionName == name }?.id
+        return if (id != null) {
+            mainMovieRepository.getCollectionByNameFlow(id)
+        } else flow { emptyList<MovieCollection>() }
     }
 }

@@ -13,7 +13,7 @@ import androidx.paging.cachedIn
 import com.example.movieinfo.utils.ListPagingFilterMovieCollection
 import com.example.movieinfo.utils.ListPagingMovieBaseInfo
 import com.example.movieinfo.utils.SearchMovieFilterImpl
-import com.movieinfo.domain.entity.MovieBaseInfo
+import com.example.movieinfo.utils.convert
 import com.movieinfo.domain.entity.MovieCollection
 import com.movieinfo.domain.usecase.SearchPageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,6 +40,8 @@ class SearchPageViewModel @Inject constructor(private val useCase: SearchPageUse
     var ratingRange = MutableStateFlow((1f..10f))
     val queryState = TextFieldState("")
     val filterMovie = mutableStateOf(SearchMovieFilterImpl())
+    val queryCountry = TextFieldState("")
+    val queryGenre = TextFieldState("")
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val movieSearchFilterResult = snapshotFlow { filterMovie.value }
@@ -74,8 +76,7 @@ class SearchPageViewModel @Inject constructor(private val useCase: SearchPageUse
             }.flow.cachedIn(viewModelScope)
         }
 
-    val queryCountry = TextFieldState("")
-    val queryGenre = TextFieldState("")
+
 
 
     suspend fun searchByFilter(
@@ -84,7 +85,7 @@ class SearchPageViewModel @Inject constructor(private val useCase: SearchPageUse
 
         Timber.d("search by query ${queryState.text}")
         return viewModelScope.async(Dispatchers.IO) {
-            useCase.getSearchByFilter(
+            useCase.execute(
                 SearchMovieFilterImpl(
                     arrayOf(countriesToId[filterMovie.value.countryInd.first()].first),
                     arrayOf(genresToId[filterMovie.value.genreInd.first()].first),
@@ -101,11 +102,11 @@ class SearchPageViewModel @Inject constructor(private val useCase: SearchPageUse
         }.await()
     }
 
-    suspend fun searchByKeyWordPaging(query: String, page: Int = 1): List<MovieBaseInfo> {
+    suspend fun searchByKeyWordPaging(query: String, page: Int = 1): List<MovieCollection> {
         return viewModelScope.async(Dispatchers.IO) {
 
-            useCase.getSearchByKeyWord(query, page)
-        }.await()
+            useCase.execute(query, page)
+        }.await().map { it.convert() }
     }
 
     val mainSearchTabList = listOf("Все", "Фильмы", "Сериалы")
