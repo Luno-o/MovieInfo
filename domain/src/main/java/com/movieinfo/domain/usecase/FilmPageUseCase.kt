@@ -2,49 +2,49 @@ package com.movieinfo.domain.usecase
 
 import com.movieinfo.domain.entity.GalleryType
 import com.movieinfo.domain.entity.MovieBaseInfo
-import com.movieinfo.domain.entity.MovieCollection
 import com.movieinfo.domain.entity.MovieDb
-import com.movieinfo.domain.entity.MovieGallery
-import com.movieinfo.domain.entity.SerialWrapper
-import com.movieinfo.domain.entity.Staff
 import com.movieinfo.domain.repository.MainMovieRepository
 import javax.inject.Inject
 
 class GetFilmUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
 
-    suspend fun execute(id: Int): MovieBaseInfo? {
-        return mainMovieRepository.getMovieById(id)
-    }
+    suspend operator fun invoke(id: Int) =
+         mainMovieRepository.getMovieById(id)
+
 }
 
 class GetSeasonsUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
-
-    suspend fun execute(id: Int): List<SerialWrapper> {
-        return mainMovieRepository.getSeasons(id)
-    }
+    suspend operator fun invoke(id: Int) =
+        mainMovieRepository.getSeasons(id)
 }
 
 class GetMovieCollectionsIdUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
-    suspend fun execute(kpId: Int): List<Int> {
-        return mainMovieRepository.getMovieCollectionId(kpId) ?: emptyList()
-    }
+    suspend operator fun invoke(kpId: Int) =
+         mainMovieRepository.getMovieCollectionId(kpId) ?: emptyList()
+
 }
 
 class GetStaffByFilmUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
-    suspend fun execute(id: Int): List<Staff> {
-        return mainMovieRepository.getStaffByFilmId(id)
-    }
+    suspend operator fun invoke(id: Int) =
+         mainMovieRepository.getStaffByFilmId(id)
+
 }
 
+class GetMovieGalleryFlowUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
+
+    suspend operator fun invoke(id: Int, galleryType: GalleryType) =
+         mainMovieRepository.getMovieGalleryFlow(id, galleryType)
+
+}
 class GetMovieGalleryUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
 
-    suspend fun execute(id: Int, galleryType: GalleryType): List<MovieGallery> {
-        return mainMovieRepository.getMovieGallery(id, galleryType)
-    }
+    suspend operator fun invoke(id: Int, galleryType: GalleryType) =
+        mainMovieRepository.getMovieGallery(id, galleryType)
+
 }
 
 class GetMovieFromDbUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
-    suspend fun execute(kpId: Int): MovieDb? {
+    suspend operator fun invoke(kpId: Int): MovieDb? {
         return mainMovieRepository.getMovieFromDB(kpId)
     }
 }
@@ -53,7 +53,7 @@ class AddToMyCollectionUseCase @Inject constructor(
     private val mainMovieRepository: MainMovieRepository
 ) {
 
-    suspend fun execute(movieBaseInfo: MovieBaseInfo?, id: Int) {
+    suspend operator fun invoke(movieBaseInfo: MovieBaseInfo?, id: Int) {
         val newCollectionList = mutableListOf<Int>()
         movieBaseInfo?.let {
             val movieToCollection = mainMovieRepository.getMovieFromDB(movieBaseInfo.kpID)

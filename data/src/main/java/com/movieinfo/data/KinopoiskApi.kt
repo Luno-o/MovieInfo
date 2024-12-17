@@ -19,15 +19,15 @@ import retrofit2.http.Query
 
 interface KinopoiskApi {
     @GET("/api/v2.2/films/premieres")
-    suspend fun getPremiers(
+     suspend fun getPremiers(
         @Query("year")
         year: Int,
         @Query("month")
         month: String
-    ): ServerSearchWrapperDto<MoviePremiereDto>?
+    ): ServerSearchWrapperDto<MoviePremiereDto>
 
 @GET("/api/v2.1/films/search-by-keyword")
-suspend fun getSearchByKeyWord(
+ suspend fun getSearchByKeyWord(
     @Query("keyword")
     keyword: String,
     @Query("page")
@@ -48,10 +48,10 @@ suspend fun getSearchByKeyWord(
     ): ServerSearchWrapperDto<SerialWrapperDto>
 
     @GET("/api/v2.2/films/{id}")
-    suspend fun getMovieById(
+     suspend fun getMovieById(
         @Path("id")
         id: Int
-    ): MovieBaseInfoDto?
+    ): MovieBaseInfoDto
 
     @GET("/api/v2.2/films/{id}/similars")
    suspend fun getSimilarMovie(
@@ -71,7 +71,7 @@ suspend fun getSearchByKeyWord(
     suspend fun getStaffByFilmId(
         @Query("filmId")
         filmId: Int
-    ): List<StaffDto>?
+    ): List<StaffDto>
 
     @GET("/api/v1/staff/{id}")
     suspend fun getStaffById(
@@ -80,7 +80,7 @@ suspend fun getSearchByKeyWord(
     ): StaffFullInfoDto
 
     @GET("/api/v2.2/films")
-    suspend fun getSearchByFilters(
+     suspend fun getSearchByFilters(
         @Query("countries")
         countries: Array<Int>?,
         @Query("genres")

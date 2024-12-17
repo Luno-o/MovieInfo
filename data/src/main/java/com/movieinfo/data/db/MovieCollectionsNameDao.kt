@@ -12,20 +12,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MovieCollectionsNameDao{
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertCollection(collectionNames: MyMovieCollectionsDb)
+     fun insertCollection(collectionNames: MyMovieCollectionsDb)
 
     @Query("SELECT * FROM ${MovieDbContracts.TABLE_NAME_COLLECTIONS}")
-    suspend fun getAllCollectionNames(): List<MyMovieCollectionsDb>
+     fun getAllCollectionNames(): List<MyMovieCollectionsDb>
 
     @Delete
-    suspend fun removeMovie(myMovieCollectionsDb: MyMovieCollectionsDb)
+     fun removeMovie(myMovieCollectionsDb: MyMovieCollectionsDb)
 
     @Update
-    suspend fun updateMovieDB(myMovieCollectionsDb: MyMovieCollectionsDb)
+     fun updateMovieDB(myMovieCollectionsDb: MyMovieCollectionsDb)
 
     @Transaction
     @Query("SELECT * FROM ${MovieDbContracts.TABLE_NAME} WHERE ${MovieDbContracts.Columns.COLLECTION_ID} LIKE '%' || :id || '%'")
-    suspend fun getMoviesByCollectionId(id: String): List<MovieCollectionDB>
+     fun getMoviesByCollectionId(id: String): List<MovieCollectionDB>
 
     @Transaction
     @Query("SELECT * FROM ${MovieDbContracts.TABLE_NAME} WHERE ${MovieDbContracts.Columns.COLLECTION_ID} LIKE '%' || :id || '%'")

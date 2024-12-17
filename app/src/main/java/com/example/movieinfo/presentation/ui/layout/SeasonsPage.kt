@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -41,6 +42,8 @@ import com.example.movieinfo.R
 import com.movieinfo.domain.entity.Episode
 import com.example.movieinfo.presentation.ui.layout.TabRowDefaults.tabIndicatorOffset
 import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
+import com.movieinfo.domain.models.LoadStateUI
+import timber.log.Timber
 
 @Composable
 fun SeasonsPageView(
@@ -53,9 +56,20 @@ fun SeasonsPageView(
         mutableStateOf(0)
     }
     val serialInfo = viewModel.seasons.collectAsState().value
-    val baseInfo = viewModel.movie.collectAsState().value!!
+    val baseInfo = viewModel.movie.collectAsState().value as LoadStateUI.Success
     val tabList = mutableListOf<String>()
-    serialInfo.forEachIndexed { index, serialWrapperDto ->
+    when(serialInfo){
+        is LoadStateUI.Loading->{
+            Box(Modifier.fillMaxSize()){
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+        is LoadStateUI.Error->{
+            Timber.e(serialInfo.throwable.message)
+        }
+        is LoadStateUI.Success->{
+
+    serialInfo.data.forEachIndexed { index, serialWrapperDto ->
         tabList.add("${index + 1}")
     }
     Column(
@@ -83,7 +97,7 @@ fun SeasonsPageView(
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 4.dp),
-                text = baseInfo.nameRU.toString(),
+                text = baseInfo.data.nameRU.toString(),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 maxLines = 3
@@ -107,13 +121,15 @@ fun SeasonsPageView(
         }
 
         LazyColumn(modifier = Modifier.padding(top = 16.dp, start = 8.dp)) {
-            serialInfo[selectedTabIndex].episodes.forEachIndexed { index, episode ->
+            serialInfo.data[selectedTabIndex].episodes.forEachIndexed { index, episode ->
                 item {
                     SeasonItem(episode = episode)
                 }
             }
         }
 
+    }
+        }
     }
 }
 

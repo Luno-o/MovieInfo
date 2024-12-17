@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,10 +45,14 @@ import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.FilmPageViewModel
 import com.movieinfo.domain.entity.CollectionType
 import com.example.movieinfo.utils.MovieInfoDestination
+import com.movieinfo.domain.entity.MovieGallery
+import com.movieinfo.domain.entity.Staff
+import com.movieinfo.domain.models.LoadStateUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 
 
 @Composable
@@ -58,17 +63,42 @@ fun SerialPageView(
     var movieIdS by remember { mutableStateOf<Int?>(null) }
     val movieBaseInfo = viewModel.movie.collectAsState().value
     val scrollState = rememberScrollState()
+    var actors = emptyList<Staff>()
+    var staff = emptyList<Staff>()
     val listSerialWrapperDto = viewModel.seasons
         .collectAsState().value
-    val actors = viewModel.staffByFilm.collectAsState().value.filter {
-        it.professionKey == "ACTOR"
+    when(val staffByFilm = viewModel.staffByFilm.collectAsState().value){
+        is LoadStateUI.Loading->{
+            Box(Modifier.fillMaxSize()){
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+        is LoadStateUI.Error->{
+            Timber.e(staffByFilm.throwable.message)
+        }
+        is LoadStateUI.Success->{
+            actors = staffByFilm.data.filter {
+                it.professionKey == "ACTOR"
 
-    }
-    val staff = viewModel.staffByFilm.collectAsState().value.filter {
-        it.professionKey != "ACTOR"
+            }
+            staff = staffByFilm.data.filter {
+                it.professionKey != "ACTOR"
+            }
+
+        }
     }
 
-    val movieGallery = viewModel.movieGallery.collectAsState().value
+    var movieGallery = emptyList<MovieGallery>()
+    when(val movieGalleryLoading = viewModel.movieGallery.collectAsState().value){
+        is LoadStateUI.Loading->{
+        }
+        is LoadStateUI.Error->{
+            Timber.e(movieGalleryLoading.throwable.message)
+        }
+        is LoadStateUI.Success->{
+            movieGallery = movieGalleryLoading.data
+        }
+    }
     runBlocking {
         if (movieIdS != movieId) {
             movieIdS = movieId
@@ -85,167 +115,199 @@ fun SerialPageView(
             }
         }
     }
-    if (movieBaseInfo != null) {
-        Column(
-            modifier = modifier
-                .background(Color.White)
-                .fillMaxSize()
-                .verticalScroll(scrollState)
+    when(movieBaseInfo){
+        is LoadStateUI.Loading->{
+            Box(Modifier.fillMaxSize()){
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+        is LoadStateUI.Error->{
+            Timber.e(movieBaseInfo.throwable.message)
+        }
+        is LoadStateUI.Success->{
+    Column(
+        modifier = modifier
+            .background(Color.White)
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                GlideImageWithPreview(
-                    data = movieBaseInfo.coverUrl,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Row(
-                    modifier = Modifier
-                        .height(56.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.arrow_back),
-                        contentDescription = null,
-                        Modifier
-                            .size(16.dp)
-                            .weight(1f)
-                            .wrapContentWidth(Alignment.Start)
-                            .padding(start = 16.dp)
-                            .clickable { navController.popBackStack() }
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .width(232.dp)
-                ) {
-                    if (movieBaseInfo.logoUrl !== null) {
-                        GlideImageWithPreview(
-                            data = movieBaseInfo.logoUrl, modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp)
-
-                        )
-                    }
-                    Text(
-                        text = "${movieBaseInfo.ratingKinopoisk} ${movieBaseInfo.nameRU}",
-                        color = Color.LightGray
-                    )
-                    Text(text = "${movieBaseInfo.year} ${
-                        movieBaseInfo
-                            .genres.joinToString { it.genre }
-                    }", color = Color.LightGray
-                    )
-                    val filmLengthHours = movieBaseInfo.filmLength?.div(60)?.toString() ?: "0"
-                    val pluralStringHours = pluralStringResource(
-                        id = R.plurals.hours_quantity,
-                        count = filmLengthHours.toInt(), filmLengthHours.toInt()
-                    )
-                    val filmLengthMinutes = movieBaseInfo.filmLength?.rem(60)?.toString() ?: "0"
-                    val pluralStringMinutes = pluralStringResource(
-                        id = R.plurals.minutes_quantity,
-                        count = filmLengthMinutes.toInt(), filmLengthMinutes.toInt()
-                    )
-                    Text(text = "${
-                        movieBaseInfo.countries.joinToString
-                        { it.country }
-                    }, $pluralStringHours $pluralStringMinutes, " +
-                            "${movieBaseInfo.ratingAgeLimits?.filter { it.isDigit() }}+",
-                        color = Color.LightGray
-                    )
-                    ToolRow(viewModel)
-                }
-            }
-            Column(
-                modifier = Modifier.padding(
-                    top = 32.dp,
-                    bottom = 32.dp,
-                    start = 16.dp,
-                    end = 16.dp
-                )
-            ) {
-                var overflowSD = TextOverflow.Ellipsis
-                val maxLineSD = remember { mutableIntStateOf(2) }
-                Text(
-                    text = "${movieBaseInfo.shortDescription}",
-                    fontSize = 16.sp,
-                    maxLines = maxLineSD.value,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .clickable {
-                            if (overflowSD == TextOverflow.Ellipsis) {
-                                overflowSD = TextOverflow.Clip
-                                maxLineSD.intValue = 4
-                            } else {
-                                overflowSD = TextOverflow.Ellipsis
-                                maxLineSD.intValue = 2
-                            }
-                        }
-                )
-                var overflowFD = TextOverflow.Ellipsis
-                val maxLineFD = remember { mutableIntStateOf(5) }
-                Text(text = "${movieBaseInfo.description}",
-                    maxLines = maxLineFD.value, fontSize = 16.sp, modifier = Modifier.clickable {
-                        if (overflowFD == TextOverflow.Ellipsis) {
-                            overflowFD = TextOverflow.Clip
-                            maxLineFD.intValue = 10
-                        } else {
-                            overflowFD = TextOverflow.Ellipsis
-                            maxLineFD.intValue = 5
-                        }
-                    })
-            }
+            GlideImageWithPreview(
+                data = movieBaseInfo.data.coverUrl,
+                modifier = Modifier.fillMaxWidth()
+            )
             Row(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .wrapContentHeight()
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .height(56.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        text = "Сезоны и серии", fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    val seasons = listSerialWrapperDto.size
-                    var series = 0
-                    listSerialWrapperDto.forEachIndexed { index, serialWrapperDto ->
-                        series += serialWrapperDto.episodes
-                            .filter { !it.releasedDate.isNullOrEmpty() }
-                            .size
-                    }
-                    Text(text = "$seasons сезон, $series серий", color = Color.Black.copy(0.5f))
-                }
-                Text(modifier = modifier.clickable {
-                    navController.navigate(MovieInfoDestination.DETAIL_SEASONS)
-                }, text = "Все", fontSize = 14.sp, color = Color(61, 59, 255))
-            }
-            ActorsGridView(staff = actors, navController)
-            StaffGridView(staff, navController)
-            GalleryView(
-                gallery = movieGallery, navController = navController,
-                kpID = movieBaseInfo.kpID.toString()
-            )
-            if (viewModel.similarMovies.collectAsState().value.isNotEmpty()) {
-                MovieCollectionView(
-                    modifier
-                        .padding(start = 8.dp)
-                        .fillMaxWidth(),
-                    null,
-                    viewModel.similarMovies,
-                    stringResource(id = R.string.similar), CollectionType.SIMILAR, navController,
-                    movieId.toString()
+                Image(
+                    painter = painterResource(id = R.drawable.arrow_back),
+                    contentDescription = null,
+                    Modifier
+                        .size(16.dp)
+                        .weight(1f)
+                        .wrapContentWidth(Alignment.Start)
+                        .padding(start = 16.dp)
+                        .clickable { navController.popBackStack() }
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
                 )
             }
-            Spacer(modifier = Modifier.height(128.dp))
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .width(232.dp)
+            ) {
+                if (movieBaseInfo.data.logoUrl !== null) {
+                    GlideImageWithPreview(
+                        data = movieBaseInfo.data.logoUrl, modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+
+                    )
+                }
+                Text(
+                    text = "${movieBaseInfo.data.ratingKinopoisk} ${movieBaseInfo.data.nameRU}",
+                    color = Color.LightGray
+                )
+                Text(text = "${movieBaseInfo.data.year} ${
+                    movieBaseInfo.data
+                        .genres.joinToString { it.genre }
+                }", color = Color.LightGray
+                )
+                val filmLengthHours = movieBaseInfo.data.filmLength?.div(60)?.toString() ?: "0"
+                val pluralStringHours = pluralStringResource(
+                    id = R.plurals.hours_quantity,
+                    count = filmLengthHours.toInt(), filmLengthHours.toInt()
+                )
+                val filmLengthMinutes = movieBaseInfo.data.filmLength?.rem(60)?.toString() ?: "0"
+                val pluralStringMinutes = pluralStringResource(
+                    id = R.plurals.minutes_quantity,
+                    count = filmLengthMinutes.toInt(), filmLengthMinutes.toInt()
+                )
+                Text(text = "${
+                    movieBaseInfo.data.countries.joinToString
+                    { it.country }
+                }, $pluralStringHours $pluralStringMinutes, " +
+                        "${movieBaseInfo.data.ratingAgeLimits?.filter { it.isDigit() }}+",
+                    color = Color.LightGray
+                )
+                ToolRow(viewModel)
+            }
+        }
+        Column(
+            modifier = Modifier.padding(
+                top = 32.dp,
+                bottom = 32.dp,
+                start = 16.dp,
+                end = 16.dp
+            )
+        ) {
+            var overflowSD = TextOverflow.Ellipsis
+            val maxLineSD = remember { mutableIntStateOf(2) }
+            Text(
+                text = "${movieBaseInfo.data.shortDescription}",
+                fontSize = 16.sp,
+                maxLines = maxLineSD.intValue,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .clickable {
+                        if (overflowSD == TextOverflow.Ellipsis) {
+                            overflowSD = TextOverflow.Clip
+                            maxLineSD.intValue = 4
+                        } else {
+                            overflowSD = TextOverflow.Ellipsis
+                            maxLineSD.intValue = 2
+                        }
+                    }
+            )
+            var overflowFD = TextOverflow.Ellipsis
+            val maxLineFD = remember { mutableIntStateOf(5) }
+            Text(text = "${movieBaseInfo.data.description}",
+                maxLines = maxLineFD.value, fontSize = 16.sp, modifier = Modifier.clickable {
+                    if (overflowFD == TextOverflow.Ellipsis) {
+                        overflowFD = TextOverflow.Clip
+                        maxLineFD.intValue = 10
+                    } else {
+                        overflowFD = TextOverflow.Ellipsis
+                        maxLineFD.intValue = 5
+                    }
+                })
+        }
+            when(listSerialWrapperDto){
+                is LoadStateUI.Loading->{
+                    Box(Modifier.fillMaxSize()){
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                }
+                is LoadStateUI.Error->{
+                    Timber.e(listSerialWrapperDto.throwable.message)
+                }
+                is LoadStateUI.Success->{
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .wrapContentHeight()
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "Сезоны и серии", fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                val seasons = listSerialWrapperDto.data.size
+                var series = 0
+                listSerialWrapperDto.data.forEachIndexed { index, serialWrapperDto ->
+                    series += serialWrapperDto.episodes
+                        .filter { !it.releasedDate.isNullOrEmpty() }
+                        .size
+                }
+                Text(text = "$seasons сезон, $series серий", color = Color.Black.copy(0.5f))
+            }
+            Text(modifier = modifier.clickable {
+                navController.navigate(MovieInfoDestination.DETAIL_SEASONS)
+            }, text = "Все", fontSize = 14.sp, color = Color(61, 59, 255))
+        }
+                }}
+        ActorsGridView(staff = actors, navController)
+        StaffGridView(staff, navController)
+        GalleryView(
+            gallery = movieGallery, navController = navController,
+            kpID = movieBaseInfo.data.kpID.toString()
+        )
+        when(val simMovie = viewModel.similarMovies.collectAsState().value){
+            is LoadStateUI.Loading->{
+                Box(Modifier.fillMaxSize()){
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
+            is LoadStateUI.Error->{
+                Timber.e(simMovie.throwable.message)
+            }
+            is LoadStateUI.Success->{
+        if (simMovie.data.isNotEmpty()) {
+            MovieCollectionView(
+                modifier
+                    .padding(start = 8.dp)
+                    .fillMaxWidth(),
+                null,
+                viewModel.similarMovies,
+                stringResource(id = R.string.similar), CollectionType.SIMILAR, navController,
+                movieId.toString()
+            )
+        }
+            }}
+        }
+        Spacer(modifier = Modifier.height(128.dp))
         }
     }
 }

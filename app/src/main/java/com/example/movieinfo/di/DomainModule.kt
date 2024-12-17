@@ -1,7 +1,7 @@
 package com.example.movieinfo.di
 
 
-import com.movieinfo.domain.usecase.GetMainPageUseCase
+import com.movieinfo.domain.usecase.GetCollectionUseCase
 import com.movieinfo.domain.repository.MainMovieRepository
 import com.movieinfo.domain.usecase.ActorUseCase
 import com.movieinfo.domain.usecase.AddCollectionUseCase
@@ -14,7 +14,7 @@ import com.movieinfo.domain.usecase.GetMovieFromDbUseCase
 import com.movieinfo.domain.usecase.GetMovieGalleryUseCase
 import com.movieinfo.domain.usecase.GetMyCollectionsUseCase
 import com.movieinfo.domain.usecase.GetSeasonsUseCase
-import com.movieinfo.domain.usecase.GetSimilarCollectionUseCase
+import com.movieinfo.domain.usecase.GetSimilarCollectionFlowUseCase
 import com.movieinfo.domain.usecase.GetStaffByFilmUseCase
 import com.movieinfo.domain.usecase.SearchPageUseCase
 import com.movieinfo.domain.usecase.ShowCollectionUseCase
@@ -30,8 +30,8 @@ import dagger.hilt.android.components.ViewModelComponent
 class DomainModule {
 
 @Provides
-    fun provideMainPageUseCase(movieRepository: MainMovieRepository): GetMainPageUseCase {
-        return GetMainPageUseCase(mainMovieRepository = movieRepository)
+    fun provideMainPageUseCase(movieRepository: MainMovieRepository): GetCollectionUseCase {
+        return GetCollectionUseCase(mainMovieRepository = movieRepository)
     }
 
     @Provides
@@ -94,8 +94,8 @@ class DomainModule {
         return ShowCollectionUseCase(mainMovieRepository = movieRepository)
     }
     @Provides
-    fun provideGetSimilarCollectionUseCase(movieRepository: MainMovieRepository): GetSimilarCollectionUseCase {
-        return GetSimilarCollectionUseCase(mainMovieRepository = movieRepository)
+    fun provideGetSimilarCollectionUseCase(movieRepository: MainMovieRepository): GetSimilarCollectionFlowUseCase {
+        return GetSimilarCollectionFlowUseCase(mainMovieRepository = movieRepository)
     }
     @Provides
     fun provideShowMyCollectionFlowUseCase(movieRepository: MainMovieRepository): ShowMyCollectionFlowUseCase {

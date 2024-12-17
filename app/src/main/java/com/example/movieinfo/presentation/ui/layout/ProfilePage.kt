@@ -86,7 +86,7 @@ fun ProfilePageView(
         )
         MovieCollectionView(
             viewModel = viewModel,
-            flow = viewModel.watchedMovie,
+            state = viewModel.watchedMovie,
             collectionName = stringResource(R.string.watched),
             movieType = CollectionType.WATCHED,
             navController = navController,
@@ -146,7 +146,7 @@ fun ProfilePageView(
         }
         MovieCollectionView(
             viewModel = viewModel,
-            flow = viewModel.yourInterest,
+            state = viewModel.yourInterest,
             collectionName = stringResource(R.string.by_ur_interest),
             movieType = CollectionType.INTEREST,
             navController = navController, allOrCount = false,

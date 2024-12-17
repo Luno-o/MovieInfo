@@ -1,6 +1,5 @@
 package com.movieinfo.domain.entity
 
-import kotlinx.coroutines.flow.MutableStateFlow
 
 enum class CollectionType{
     TOP_POPULAR_ALL,

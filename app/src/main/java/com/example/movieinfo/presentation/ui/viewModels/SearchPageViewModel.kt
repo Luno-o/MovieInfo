@@ -1,6 +1,7 @@
 package com.example.movieinfo.presentation.ui.viewModels
 
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
@@ -39,7 +40,7 @@ class SearchPageViewModel @Inject constructor(private val useCase: SearchPageUse
     val yearAfter = mutableIntStateOf(1998)
     var ratingRange = MutableStateFlow((1f..10f))
     val queryState = TextFieldState("")
-    val filterMovie = mutableStateOf(SearchMovieFilterImpl())
+    val filterMovie = MutableStateFlow(SearchMovieFilterImpl())
     val queryCountry = TextFieldState("")
     val queryGenre = TextFieldState("")
 

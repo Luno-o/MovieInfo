@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -55,6 +56,7 @@ import com.example.movieinfo.utils.MovieInfoDestination
 import com.movieinfo.domain.entity.CollectionType
 import com.movieinfo.domain.entity.MovieGallery
 import com.movieinfo.domain.entity.Staff
+import com.movieinfo.domain.models.LoadStateUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -75,15 +77,39 @@ fun FilmPageView(
     val scrollState = rememberScrollState()
     val movieBaseInfo = viewModel.movie
         .collectAsState().value
-    val actors = viewModel.staffByFilm
-        .collectAsState().value.filter {
+    var actors = emptyList<Staff>()
+    var staff = emptyList<Staff>()
+    when(val staffByFilm = viewModel.staffByFilm.collectAsState().value){
+        is LoadStateUI.Loading->{
+            Box(Modifier.fillMaxSize()){
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+        is LoadStateUI.Error->{
+            Timber.e(staffByFilm.throwable.message)
+        }
+        is LoadStateUI.Success->{
+     actors = staffByFilm.data.filter {
             it.professionKey == "ACTOR"
 
         }
-    val staff = viewModel.staffByFilm.collectAsState().value.filter {
+     staff = staffByFilm.data.filter {
         it.professionKey != "ACTOR"
     }
-    val movieGallery = viewModel.movieGallery.collectAsState().value
+
+        }
+    }
+    var movieGallery = emptyList<MovieGallery>()
+    when(val movieGalleryLoading = viewModel.movieGallery.collectAsState().value){
+        is LoadStateUI.Loading->{
+        }
+        is LoadStateUI.Error->{
+            Timber.e(movieGalleryLoading.throwable.message)
+        }
+        is LoadStateUI.Success->{
+            movieGallery = movieGalleryLoading.data
+        }
+    }
     runBlocking {
         viewModel.viewModelScope.launch(Dispatchers.IO) {
             if (movieIdS != movieId) {
@@ -99,162 +125,177 @@ fun FilmPageView(
             }
         }
     }
-    if (movieBaseInfo !== null) {
-        Column(
-            modifier = modifier
-                .background(Color.White)
-                .fillMaxSize()
-                .verticalScroll(scrollState)
+    when(movieBaseInfo){
+        is LoadStateUI.Loading->{
+            Box(Modifier.fillMaxSize()){
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+        is LoadStateUI.Error->{
+            Timber.e(movieBaseInfo.throwable.message)
+        }
+        is LoadStateUI.Success->{
+    Column(
+        modifier = modifier
+            .background(Color.White)
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
-            Box(
+            GlideImageWithPreview(
+                data = movieBaseInfo.data.coverUrl ?: movieBaseInfo.data.posterUrl,
+                modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.Fit
+            )
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .height(56.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                GlideImageWithPreview(
-                    data = movieBaseInfo.coverUrl ?: movieBaseInfo.posterUrl,
-                    modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.Fit
+                Image(
+                    painter = painterResource(id = R.drawable.arrow_back),
+                    contentDescription = null,
+                    Modifier
+                        .size(16.dp)
+                        .weight(1f)
+                        .wrapContentWidth(Alignment.Start)
+                        .padding(start = 16.dp)
+                        .clickable { navController.popBackStack() }
                 )
-                Row(
+                Box(
                     modifier = Modifier
-                        .height(56.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.arrow_back),
-                        contentDescription = null,
-                        Modifier
-                            .size(16.dp)
-                            .weight(1f)
-                            .wrapContentWidth(Alignment.Start)
-                            .padding(start = 16.dp)
-                            .clickable { navController.popBackStack() }
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .width(192.dp)
-                ) {
-                    if (movieBaseInfo.logoUrl !== null) {
-                        GlideImageWithPreview(
-                            data = movieBaseInfo.logoUrl, modifier = Modifier
-                                .fillMaxWidth()
-                                .height(40.dp)
-                        )
-                    }
-                    Text(
-                        text = "${movieBaseInfo.ratingKinopoisk} ${movieBaseInfo.nameRU}",
-                        color = Color.LightGray
-                    )
-                    Text(text = "${movieBaseInfo.year} ${
-                        movieBaseInfo
-                            .genres.joinToString { it.genre }
-                    }", color = Color.LightGray
-                    )
-                    val filmLengthHours = "${movieBaseInfo.filmLength?.div(60) ?: 0}"
-                    val pluralStringHours = pluralStringResource(
-                        id = R.plurals.hours_quantity,
-                        count = filmLengthHours.toInt(), filmLengthHours.toInt()
-                    )
-                    val filmLengthMinutes = "${movieBaseInfo.filmLength?.rem(60) ?: 0}"
-                    val pluralStringMinutes = pluralStringResource(
-                        id = R.plurals.minutes_quantity,
-                        count = filmLengthMinutes.toInt(), filmLengthMinutes.toInt()
-                    )
-                    Text(text = "${
-                        movieBaseInfo.countries.joinToString
-                        { it.country }
-                    }, $pluralStringHours $pluralStringMinutes, " +
-                            "${movieBaseInfo.ratingAgeLimits?.filter { it.isDigit() }}+",
-                        color = Color.LightGray
-                    )
-                    ToolRow(viewModel)
-                }
+                        .weight(1f)
+                )
             }
             Column(
-                modifier = Modifier.padding(
-                    top = 32.dp,
-                    bottom = 32.dp,
-                    start = 16.dp,
-                    end = 16.dp
-                )
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .width(192.dp)
             ) {
-                var overflowSD = TextOverflow.Ellipsis
-                var maxLineSD = 2
-
-
+                if (movieBaseInfo.data.logoUrl !== null) {
+                    GlideImageWithPreview(
+                        data = movieBaseInfo.data.logoUrl, modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                    )
+                }
                 Text(
-                    text = movieBaseInfo.shortDescription
-                        ?: stringResource(R.string.no_short_description),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    overflow = overflowSD,
-                    maxLines = maxLineSD,
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .clickable {
-                            if (overflowSD == TextOverflow.Ellipsis) {
-                                overflowSD = TextOverflow.Clip
-                                maxLineSD = 4
-                            } else {
-                                overflowSD = TextOverflow.Ellipsis
-                                maxLineSD = 2
-                            }
-                        }
+                    text = "${movieBaseInfo.data.ratingKinopoisk} ${movieBaseInfo.data.nameRU}",
+                    color = Color.LightGray
                 )
-                var overflowFD = TextOverflow.Ellipsis
-                val maxLineFD = remember { mutableIntStateOf(5) }
-                Text(text = "${movieBaseInfo.description}",
-                    maxLines = maxLineFD.intValue, fontSize = 16.sp,
-                    overflow = TextOverflow.Ellipsis, modifier = Modifier.clickable {
-                        if (overflowFD == TextOverflow.Ellipsis) {
-                            overflowFD = TextOverflow.Clip
-                            maxLineFD.intValue = 10
-                        } else {
-                            overflowFD = TextOverflow.Ellipsis
-                            maxLineFD.intValue = 5
-                        }
-                    })
+                Text(text = "${movieBaseInfo.data.year} ${
+                    movieBaseInfo
+                        .data.genres.joinToString { it.genre }
+                }", color = Color.LightGray
+                )
+                val filmLengthHours = "${movieBaseInfo.data.filmLength?.div(60) ?: 0}"
+                val pluralStringHours = pluralStringResource(
+                    id = R.plurals.hours_quantity,
+                    count = filmLengthHours.toInt(), filmLengthHours.toInt()
+                )
+                val filmLengthMinutes = "${movieBaseInfo.data.filmLength?.rem(60) ?: 0}"
+                val pluralStringMinutes = pluralStringResource(
+                    id = R.plurals.minutes_quantity,
+                    count = filmLengthMinutes.toInt(), filmLengthMinutes.toInt()
+                )
+                Text(text = "${
+                    movieBaseInfo.data.countries.joinToString
+                    { it.country }
+                }, $pluralStringHours $pluralStringMinutes, " +
+                        "${movieBaseInfo.data.ratingAgeLimits?.filter { it.isDigit() }}+",
+                    color = Color.LightGray
+                )
+                ToolRow(viewModel)
             }
-            ActorsGridView(staff = actors, navController)
-            StaffGridView(staff, navController)
-            GalleryView(
-                gallery = movieGallery,
-                kpID = movieId.toString(),
-                navController = navController
+        }
+        Column(
+            modifier = Modifier.padding(
+                top = 32.dp,
+                bottom = 32.dp,
+                start = 16.dp,
+                end = 16.dp
             )
-            if (viewModel.similarMovies.collectAsState().value.isNotEmpty()) {
-                MovieCollectionView(
-                    modifier
-                        .padding(start = 8.dp)
-                        .fillMaxWidth(),
-                    null,
-                    viewModel.similarMovies,
-                    stringResource(R.string.similar), CollectionType.SIMILAR, navController,
-                    movieBaseInfo.kpID.toString()
-                )
-            }
-            Spacer(modifier = Modifier.height(128.dp))
+        ) {
+            var overflowSD = TextOverflow.Ellipsis
+            var maxLineSD = 2
+
+
+            Text(
+                text = movieBaseInfo.data.shortDescription
+                    ?: stringResource(R.string.no_short_description),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                overflow = overflowSD,
+                maxLines = maxLineSD,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .clickable {
+                        if (overflowSD == TextOverflow.Ellipsis) {
+                            overflowSD = TextOverflow.Clip
+                            maxLineSD = 4
+                        } else {
+                            overflowSD = TextOverflow.Ellipsis
+                            maxLineSD = 2
+                        }
+                    }
+            )
+            var overflowFD = TextOverflow.Ellipsis
+            val maxLineFD = remember { mutableIntStateOf(5) }
+            Text(text = "${movieBaseInfo.data.description}",
+                maxLines = maxLineFD.intValue, fontSize = 16.sp,
+                overflow = TextOverflow.Ellipsis, modifier = Modifier.clickable {
+                    if (overflowFD == TextOverflow.Ellipsis) {
+                        overflowFD = TextOverflow.Clip
+                        maxLineFD.intValue = 10
+                    } else {
+                        overflowFD = TextOverflow.Ellipsis
+                        maxLineFD.intValue = 5
+                    }
+                })
+        }
+        ActorsGridView(staff = actors, navController)
+        StaffGridView(staff, navController)
+        GalleryView(
+            gallery = movieGallery,
+            kpID = movieId.toString(),
+            navController = navController
+        )
+        if (viewModel.similarMovies.collectAsState().value is LoadStateUI.Success) {
+            MovieCollectionView(
+                modifier
+                    .padding(start = 8.dp)
+                    .fillMaxWidth(),
+                null,
+                viewModel.similarMovies,
+                stringResource(R.string.similar), CollectionType.SIMILAR, navController,
+                movieBaseInfo.data.kpID.toString()
+            )
+        }
+        Spacer(modifier = Modifier.height(128.dp))
+    }
+
+
         }
     }
 }
 
 @Composable
 fun ToolRow(viewModel: FilmPageViewModel) {
-    val kpID = viewModel.movie.collectAsStateWithLifecycle().value?.kpID
-    kpID?.let {
-        runBlocking {
-            viewModel.viewModelScope.launch(Dispatchers.IO) {
-                viewModel.getCollectionsIdForMovie(kpID)
-                Timber.d("ToolRow get collections id by $kpID")
-            }
+    when(val movie = viewModel.movie.collectAsStateWithLifecycle().value){
+        is LoadStateUI.Loading->{}
+        is LoadStateUI.Error->{
+            Timber.e(movie.throwable.message)
         }
-    }
-    val collectionsId = viewModel.collectionsIdForMovie.collectAsStateWithLifecycle().value
+        is LoadStateUI.Success->{
+    val kpID = movie.data.kpID
+            runBlocking {
+                viewModel.viewModelScope.launch(Dispatchers.IO) {
+                    viewModel.getCollectionsIdForMovie(kpID)
+                    Timber.d("ToolRow get collections id by $kpID")
+                }
+            }
     val isFav = viewModel.isMyFavourite.collectAsStateWithLifecycle().value
     val isWtchd = viewModel.isMyWatched.collectAsStateWithLifecycle().value
     val isBkmr = viewModel.isMyBookmark.collectAsStateWithLifecycle().value
@@ -331,6 +372,10 @@ fun ToolRow(viewModel: FilmPageViewModel) {
                 tint = Color.LightGray
             )
         }
+    }
+        }
+
+
     }
 }
 

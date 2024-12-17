@@ -27,28 +27,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.ActorViewModel
 import com.example.movieinfo.utils.MovieInfoDestination
 import com.movieinfo.domain.entity.CollectionType
+import com.movieinfo.domain.models.LoadStateUI
 import kotlinx.coroutines.runBlocking
 
 
 @Composable
 fun ActorPageView(
     modifier: Modifier = Modifier,
-    viewModel: ActorViewModel = viewModel(),
+    viewModel: ActorViewModel,
     navController: NavController,
     staffID: String,
     innerPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val scrollState = rememberScrollState()
-    val staffFullInfo = viewModel.staff.collectAsState()
+    val staffFullInfo = viewModel.staff.collectAsState().value
     runBlocking {
         viewModel.loadStaffById(staffID.toInt())
     }
+    when(staffFullInfo){
+        is LoadStateUI.Loading->{}
+        is LoadStateUI.Error->{
+
+        }
+        is LoadStateUI.Success->{
     Column(
         modifier = modifier
             .background(Color.White)
@@ -73,12 +79,12 @@ fun ActorPageView(
         }
         Row {
             GlideImageWithPreview(
-                data = staffFullInfo.value.posterUrl, modifier = Modifier
+                data = staffFullInfo.data.posterUrl, modifier = Modifier
                     .size(146.dp, 201.dp)
                     .padding(start = 16.dp)
             )
             Column {
-                staffFullInfo.value.nameRU?.let {
+                staffFullInfo.data.nameRU?.let {
                     Text(
                         text = it,
                         fontWeight = FontWeight.Bold,
@@ -86,7 +92,7 @@ fun ActorPageView(
                         modifier = Modifier.padding(start = 16.dp)
                     )
                 }
-                staffFullInfo.value.profession?.let {
+                staffFullInfo.data.profession?.let {
                     Text(
                         text = it,
                         fontSize = 12.sp,
@@ -101,7 +107,7 @@ fun ActorPageView(
                 .fillMaxWidth()
                 .padding(start = 8.dp),
             viewModel = null,
-            flow = viewModel.staffMovieCollection,
+            state = viewModel.staffMovieCollection,
             collectionName = stringResource(R.string.best),
             movieType = CollectionType.BEST,
             navController = navController,
@@ -123,7 +129,7 @@ fun ActorPageView(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${staffFullInfo.value.films.size} фильма",
+                    text = "${staffFullInfo.data.films.size} фильма",
                     color = Color.Black.copy(0.5f)
                 )
             }
@@ -141,6 +147,8 @@ fun ActorPageView(
 
                 )
             }
+        }
+    }
         }
     }
 }

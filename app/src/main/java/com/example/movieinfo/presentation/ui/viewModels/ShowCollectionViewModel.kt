@@ -2,20 +2,18 @@ package com.example.movieinfo.presentation.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.example.movieinfo.utils.ListPagingMovieCollection
 import com.movieinfo.domain.entity.CollectionType
 import com.movieinfo.domain.entity.MovieCollection
+import com.movieinfo.domain.models.LoadStateUI
 import com.movieinfo.domain.usecase.GetSimilarCollectionUseCase
 import com.movieinfo.domain.usecase.ShowCollectionUseCase
 import com.movieinfo.domain.usecase.ShowMyCollectionFlowUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,7 +24,7 @@ class ShowCollectionViewModel @Inject constructor(
 ) :
     ViewModel() {
 
-    private val _yourCollection = MutableStateFlow<List<MovieCollection>>(emptyList())
+    private val _yourCollection = MutableStateFlow<LoadStateUI<List<MovieCollection>>>(LoadStateUI.Loading)
     val yourCollection = _yourCollection.asStateFlow()
 
     fun getPagingData(collectionType: String?, kpId: String): Flow<PagingData<MovieCollection>>? {
@@ -42,21 +40,25 @@ class ShowCollectionViewModel @Inject constructor(
         page: Int = 1,
         collectionType: CollectionType
     ): List<MovieCollection> {
-        return showCollectionUseCase
-            .execute(collectionType, page)
+        return showCollectionUseCase(collectionType, page)
     }
 
     suspend fun loadSimilarMovie(id: Int): List<MovieCollection> {
-        return similarCollectionUseCase.execute(id)
+        return similarCollectionUseCase(id)
     }
 
     suspend fun getCollectionByNameFlow(name: String){
-        val deferred = viewModelScope.async {
-                showMyCollectionFlowUseCase.execute(name)
-        }.await()
-        deferred.collectLatest {
-        _yourCollection.value = it
-        }
+  showMyCollectionFlowUseCase(name).collect{
+      _yourCollection.emit(it)
+  }
+
+
+//        val deferred = viewModelScope.async {
+//                showMyCollectionFlowUseCase(name)
+//        }.await()
+//        deferred.collectLatest {
+//        _yourCollection.value = it
+//        }
     }
 
     companion object {

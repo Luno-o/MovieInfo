@@ -53,7 +53,7 @@ fun MainPageView(
             items(collections.size) {
                 MovieCollectionView(
                     viewModel = null,
-                    flow = collections[it].movieCards,
+                    state = collections[it].movieCards,
                     collectionName = collections[it].collectionName,
                     movieType = collections[it].movieType,
                     navController = navController

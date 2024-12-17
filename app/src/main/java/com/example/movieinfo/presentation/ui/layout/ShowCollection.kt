@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -42,6 +41,7 @@ import com.example.movieinfo.R
 import com.example.movieinfo.presentation.ui.viewModels.ActorViewModel
 import com.movieinfo.domain.entity.CollectionType
 import com.example.movieinfo.presentation.ui.viewModels.ShowCollectionViewModel
+import com.movieinfo.domain.models.LoadStateUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -76,13 +76,14 @@ fun ShowCollectionView(
             }
 
         }
+
         CollectionType.BEST.name -> {
-            collectionRow = collectionName?.let {cn->
-                actorViewModel?.let { avm->
-                MovieCollectionRow(
-                    avm.staffMovieCollection,
-                    cn, CollectionType.BEST
-                )
+            collectionRow = collectionName?.let { cn ->
+                actorViewModel?.let { avm ->
+                    MovieCollectionRow(
+                        avm.staffMovieCollection,
+                        cn, CollectionType.BEST
+                    )
                 }
             }
 
@@ -176,21 +177,29 @@ fun ShowCollectionView(
                     }
                 }
             }
-            LazyVerticalGrid(columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(start = 56.dp, end = 56.dp),
-                content = {
-                    try {
-                        items(collection.size) {
-                            MovieCardView(
-                                movieCard = collectionRow.movieCards.value[it],
-                                navController
-                            )
-                        }
-                    } catch (e: Exception) {
-
-                        Timber.d(" ошибка ${e.message}")
+            when (collection) {
+                is LoadStateUI.Loading -> {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
-                })
+                }
+                is LoadStateUI.Error -> {
+                    Timber.e(collection.throwable.message)
+                }
+
+                is LoadStateUI.Success -> {
+                    LazyVerticalGrid(columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(start = 56.dp, end = 56.dp),
+                        content = {
+                            items(collection.data.size) {
+                                MovieCardView(
+                                    movieCard = collection.data[it],
+                                    navController
+                                )
+                            }
+                        })
+                }
+            }
         } else {
 
             val items = pageData?.collectAsLazyPagingItems()

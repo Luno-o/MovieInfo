@@ -7,19 +7,19 @@ import javax.inject.Inject
 
 class GetMyCollectionsUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
 
-    suspend fun execute(): List<MyMovieCollections> {
+    suspend  operator fun invoke(): List<MyMovieCollections> {
         return mainMovieRepository.getMyCollections()
     }
 }
 
 class AddCollectionUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
-    suspend fun execute(name: String) {
+    suspend operator fun invoke(name: String) {
         mainMovieRepository.addCollection(name)
     }
 }
 
 class GetCollectionByNameUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
-    suspend fun execute(name: String): List<MovieDb> {
+    suspend operator fun invoke(name: String): List<MovieDb> {
         val id = mainMovieRepository.getMyCollections().find { it.collectionName == name }?.id
         return if (id != null) {
             mainMovieRepository.getCollectionById(id)
@@ -30,7 +30,7 @@ class GetCollectionByNameUseCase @Inject constructor(private val mainMovieReposi
 }
 
 class DeleteHistoryUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
-    suspend fun execute(collectionId: Int) {
+    suspend operator fun invoke(collectionId: Int) {
         val collection = mainMovieRepository.getCollectionById(collectionId)
         collection.forEach { movie ->
             if (movie.collectionId.size == 1) {

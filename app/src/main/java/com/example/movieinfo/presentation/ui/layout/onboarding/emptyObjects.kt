@@ -12,6 +12,7 @@ import com.movieinfo.domain.entity.MovieForStaff
 import com.movieinfo.domain.entity.MovieGallery
 import com.movieinfo.domain.entity.Staff
 import com.movieinfo.domain.entity.StaffFullInfo
+import com.movieinfo.domain.models.LoadStateUI
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.StateFlow
 
@@ -219,10 +220,11 @@ val emptyMovieCard = object : MovieCollection {
         get() = null
 }
 val collectionRow = MovieCollectionRow(movieCards =
-object : StateFlow<List<MovieCollection>> {
-    override val replayCache: List<List<MovieCollection>>
+object : StateFlow<LoadStateUI<List<MovieCollection>>> {
+    override val replayCache: List<LoadStateUI<List<MovieCollection>>>
         get() = TODO("Not yet implemented")
-    override val value: List<MovieCollection> = listOf(
+
+    override val value: LoadStateUI<List<MovieCollection>> = LoadStateUI.Success(listOf(
         emptyMovieCard,
         emptyMovieCard,
         emptyMovieCard,
@@ -233,10 +235,9 @@ object : StateFlow<List<MovieCollection>> {
         emptyMovieCard,
         emptyMovieCard,
         emptyMovieCard
-    )
+    ))
 
-
-    override suspend fun collect(collector: FlowCollector<List<MovieCollection>>): Nothing {
+    override suspend fun collect(collector: FlowCollector<LoadStateUI<List<MovieCollection>>>): Nothing {
         TODO("Not yet implemented")
     }
 

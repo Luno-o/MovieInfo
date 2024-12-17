@@ -58,7 +58,6 @@ android {
         }
     }
 
-
 }
 
 dependencies {
@@ -101,9 +100,9 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     ksp ("androidx.room:room-compiler:2.6.1")
     //navigation
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.8.1")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.8.1")
-    implementation("androidx.navigation:navigation-compose:2.8.1")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.8.5")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.8.5")
+    implementation("androidx.navigation:navigation-compose:2.8.5")
 
     //network
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
@@ -123,7 +122,7 @@ dependencies {
     //date time
 implementation("com.jakewharton.threetenabp:threetenabp:1.2.4")
     //pager
-    implementation ("androidx.paging:paging-compose:3.3.2")
+    implementation ("androidx.paging:paging-compose:3.3.5")
     implementation ("com.google.accompanist:accompanist-pager:0.24.13-rc")
 
 }
