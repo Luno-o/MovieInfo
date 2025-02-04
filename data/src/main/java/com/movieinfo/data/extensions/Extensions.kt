@@ -22,14 +22,14 @@ fun MyCollections.toMyMovieCollections(): MyMovieCollections{
 }
 fun MyMovieDb.toMovieDb(): MovieDb{
     return MovieDb(this.collectionId,this.kpID,this.imdbId,this.nameRU,this.nameENG,this.nameOriginal,
-        this.countries?.let { listOf(CountryImpl(it)) } ?: emptyList(),
-        this.genre?.let { listOf(GenreImpl(it)) } ?: emptyList(),
+        this.countries?.let { listOf(CountryImpl(it)) },
+        this.genre?.let { listOf(GenreImpl(it)) },
         this.ratingKP,this.ratingImdb,this.year,this.type,
         this.posterUrl,this.prevPosterUrl
         )
 }
 fun MovieDb.toMyMovieDb(): MyMovieDb{
     return MyMovieDbImpl(this.collectionId,this.kpID,this.imdbId,
-        this.nameRU,this.nameENG,this.nameOriginal,this.countries?.first()?.country,this.genre?.first()?.genre,
-        this.raitingKP,this.raitingImdb,this.year,this.type,this.posterUrl,this.prevPosterUrl)
+        this.nameRU,this.nameENG,this.nameOriginal,this.countries?.firstOrNull()?.country,this.genre?.firstOrNull()?.genre,
+        this.ratingKP,this.ratingImdb,this.year,this.type,this.posterUrl,this.prevPosterUrl)
 }

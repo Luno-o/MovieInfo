@@ -18,7 +18,7 @@ interface MovieCollectionsNameDao{
      fun getAllCollectionNames(): List<MyMovieCollectionsDb>
 
     @Delete
-     fun removeMovie(myMovieCollectionsDb: MyMovieCollectionsDb)
+     fun removeCollection(myMovieCollectionsDb: MyMovieCollectionsDb)
 
     @Update
      fun updateMovieDB(myMovieCollectionsDb: MyMovieCollectionsDb)

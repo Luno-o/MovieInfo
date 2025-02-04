@@ -8,7 +8,7 @@ import com.movieinfo.domain.entity.MovieForStaff
 import com.movieinfo.domain.entity.Spouses
 import com.movieinfo.domain.entity.StaffFullInfo
 
-class MovieCollectionImpl(
+data class MovieCollectionImpl(
     override val kpID: Int,
     override val imdbId: String?,
     override val nameRU: String?,
@@ -16,8 +16,8 @@ class MovieCollectionImpl(
     override val nameOriginal: String?,
     override val countries: List<Country>?,
     override val genre: List<Genre>?,
-    override val raitingKP: Float?,
-    override val raitingImdb: Float?,
+    override val ratingKP: Float?,
+    override val ratingImdb: Float?,
     override val year: Int?,
     override val type: String?,
     override val posterUrl: String?,

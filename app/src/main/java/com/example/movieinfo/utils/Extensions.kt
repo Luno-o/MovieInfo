@@ -15,8 +15,8 @@ fun MovieBaseInfo.convert(): MovieCollectionImpl {
         nameOriginal = nameOriginal,
         countries = countries,
         genre = genres,
-        raitingKP = ratingKinopoisk ?: 0.0f,
-        raitingImdb = ratingImdb ?: 0.0f,
+        ratingKP = ratingKinopoisk ?: 0.0f,
+        ratingImdb = ratingImdb ?: 0.0f,
         year = year,
         type = type,
         posterUrl = posterUrl,
@@ -36,8 +36,8 @@ fun movieDBToMovieCollection(movieDB: MovieDb): MovieCollection {
         nameRU = movieDB.nameRU,
         nameENG = movieDB.nameENG,
         nameOriginal = movieDB.nameOriginal,
-        raitingKP = movieDB.raitingKP,
-        raitingImdb = movieDB.raitingImdb,
+        ratingKP = movieDB.ratingKP,
+        ratingImdb = movieDB.ratingImdb,
         year = movieDB.year,
         type = movieDB.type
     )

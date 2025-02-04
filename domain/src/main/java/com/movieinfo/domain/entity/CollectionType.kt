@@ -45,8 +45,8 @@ interface MovieCollection {
     val nameOriginal: String?
     val countries: List<Country>?
     val genre: List<Genre>?
-    val raitingKP: Float?
-    val raitingImdb: Float?
+    val ratingKP: Float?
+    val ratingImdb: Float?
     val year: Int?
     val type: String?
     val posterUrl: String?

@@ -4,6 +4,13 @@ plugins {
     id("com.android.library")
     id("com.google.devtools.ksp")
 }
+tasks.withType<Test>{
+    useJUnitPlatform()
+    maxHeapSize = "1G"
+    testLogging{
+        events("passed","failed")
+    }
+}
 room {
     schemaDirectory("$projectDir/schemas")
 }
@@ -67,4 +74,20 @@ dependencies {
     implementation ("com.google.dagger:hilt-android:2.51.1")
     ksp ("com.google.dagger:hilt-compiler:2.51.1")
 
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
+    testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testRuntimeOnly ("org.junit.jupiter:junit-jupiter-params:5.9.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-suite:1.9.1")
+
+
+    testImplementation("org.mockito:mockito-core:4.0.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation("org.mockito:mockito-inline:4.0.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    //date time
+    testImplementation("com.jakewharton.threetenabp:threetenabp:1.2.4")
+    testImplementation( "org.threeten:threetenbp:1.3.1")
 }

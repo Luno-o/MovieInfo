@@ -21,7 +21,7 @@ class GetSimilarCollectionFlowUseCase
     private val mainMovieRepository: MainMovieRepository
 ) {
     suspend operator fun invoke(id: Int) =
-         mainMovieRepository.getSimilarMovieFlow(id)
+         mainMovieRepository.loadSimilarMovieFlow(id)
 
 }
 class GetSimilarCollectionUseCase
@@ -29,7 +29,7 @@ class GetSimilarCollectionUseCase
     private val mainMovieRepository: MainMovieRepository
 ) {
     suspend operator fun invoke(id: Int) =
-        mainMovieRepository.getSimilarMovie(id)
+        mainMovieRepository.loadSimilarMovie(id)
 
 }
 

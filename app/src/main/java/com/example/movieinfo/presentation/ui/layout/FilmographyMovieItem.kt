@@ -1,6 +1,7 @@
 package com.example.movieinfo.presentation.ui.layout
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,20 +20,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.movieinfo.utils.convert
-import com.movieinfo.data.repository.storage.models.MovieCollectionImpl
-import com.movieinfo.domain.entity.MovieBaseInfo
+import androidx.navigation.NavController
+import com.example.movieinfo.utils.MovieInfoDestination
 import com.movieinfo.domain.entity.MovieCollection
+import com.movieinfo.domain.entity.MovieType
 
 @Composable
 fun FilmographyMovieItem(
-    movieCard: MovieCollection? = null
+    movieCard: MovieCollection? = null,navController : NavController
 ) {
 
     Row(
         modifier = Modifier
             .wrapContentSize()
-            .padding(top = 8.dp, end = 8.dp, start = 8.dp),
+            .padding(top = 8.dp, end = 8.dp, start = 8.dp)
+            .clickable {
+                if (movieCard?.type == MovieType.FILM.name)
+                    navController.navigate("${MovieInfoDestination.DETAIL_MOVIE}/${movieCard.kpID}")
+                else if (movieCard?.type !== null) navController.navigate("${MovieInfoDestination.DETAIL_SERIAL}/${movieCard.kpID}")
+            },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -45,7 +51,7 @@ fun FilmographyMovieItem(
             )
 
             Text(
-                text = movieCard?.raitingKP.toString(),
+                text = movieCard?.ratingKP.toString(),
                 fontSize = 6.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,

@@ -1,14 +1,20 @@
-
+import de.mannodermaus.gradle.plugins.junit5.junitPlatform
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 plugins {
-    id("java-library")
     id("org.jetbrains.kotlin.jvm")
+//    id("com.android.application")
 //    id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 //    id("de.mannodermaus.android-junit5")
 }
-tasks.named<Test>("test"){
+tasks.withType<KotlinCompile>{
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+
+tasks.withType<Test>{
     useJUnitPlatform()
     maxHeapSize = "1G"
     testLogging{
@@ -17,10 +23,11 @@ tasks.named<Test>("test"){
 }
 
 
-//java {
-//    sourceCompatibility = JavaVersion.VERSION_1_8
-//    targetCompatibility = JavaVersion.VERSION_1_8
-//}
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 
 dependencies{
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
@@ -28,7 +35,6 @@ dependencies{
     ksp ("com.google.dagger:dagger-compiler:2.51.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
     testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.9.1")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.9.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("de.mannodermaus.junit5:android-test-core:1.3.0")
     testRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.3.0")
@@ -42,4 +48,5 @@ dependencies{
     val  coroutinesVersion = "1.6.4"
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 }

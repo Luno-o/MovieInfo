@@ -25,9 +25,9 @@ interface MainMovieRepository {
         page: Int
     ): Flow<LoadStateUI<List<MovieCollection>>>
       suspend fun loadStaffById(id: Int): Flow<LoadStateUI<StaffFullInfo>>
-    suspend fun getSeasons(id: Int): Flow<LoadStateUI<List<SerialWrapper>>>
-    suspend fun getSimilarMovieFlow(id: Int): Flow<LoadStateUI<List<MovieCollection>>>
-    suspend fun getSimilarMovie(id: Int): List<MovieCollection>
+    suspend fun loadSeasons(id: Int): Flow<LoadStateUI<List<SerialWrapper>>>
+    suspend fun loadSimilarMovieFlow(id: Int): Flow<LoadStateUI<List<MovieCollection>>>
+    suspend fun loadSimilarMovie(id: Int): List<MovieCollection>
     suspend fun getMovieGalleryFlow(id: Int, galleryType: GalleryType): Flow<LoadStateUI<List<MovieGallery>>>
     suspend fun getMovieGallery(id: Int, galleryType: GalleryType): List<MovieGallery>
     suspend fun getStaffByFilmId(id: Int): Flow<LoadStateUI<List<Staff>>>

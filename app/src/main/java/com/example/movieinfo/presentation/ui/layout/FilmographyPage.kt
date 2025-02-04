@@ -153,7 +153,7 @@ fun FilmographyPageView(
                 LazyColumn(modifier = Modifier.padding(top = 16.dp, start = 8.dp)) {
                     listOfMovie.forEachIndexed { index, movieCollection ->
                         item {
-                            FilmographyMovieItem(movieCard = movieCollection)
+                            FilmographyMovieItem(movieCard = movieCollection,navController)
                         }
                     }
                 }

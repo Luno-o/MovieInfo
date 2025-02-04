@@ -49,9 +49,9 @@ fun MovieCardView(movieCard: MovieCollection, navController: NavController) {
                     .size(111.dp, 156.dp)
                     .background(Color.LightGray)
             )
-            if (movieCard.raitingKP !== null) {
+            if (movieCard.ratingKP !== null) {
                 Text(
-                    text = movieCard.raitingKP.toString(),
+                    text = movieCard.ratingKP.toString(),
                     fontSize = 6.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,

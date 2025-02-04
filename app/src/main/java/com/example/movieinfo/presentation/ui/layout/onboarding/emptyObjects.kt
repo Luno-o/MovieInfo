@@ -20,132 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 data class MainPage(val collectionsList: List<MovieCollectionRow>)
 
 
-val emptyMovieBaseInfo = object : MovieBaseInfo {
-    override val kpID: Int
-        get() = 4414587
-    override val kpHdId: String?
-        get() = "4a0e81d5d0584c52b61baaa6e1d1ff71"
-    override val ImdbId: String?
-        get() = "tt5177120"
-    override val nameRU: String?
-        get() = "Министерство неджентльменских дел"
-    override val nameENG: String?
-        get() = null
-    override val nameOriginal: String?
-        get() = "The Ministry of Ungentlemanly Warfare"
-    override val posterUrl: String
-        get() = "https://kinopoiskapiunofficial.tech/images/posters/kp/4414587.jpg"
-    override val prevPosterUrl: String
-        get() = "https://kinopoiskapiunofficial.tech/images/posters/kp_small/4414587.jpg"
-    override val coverUrl: String
-        get() = "https://avatars.mds.yandex.net/get-ott/224348/2a0000018f3e89a200cf1fd5a46d92eb7fc5/orig"
-    override val logoUrl: String?
-        get() = null
-    override val reviewsCount: Int
-        get() = 6
-    override val ratingGoodReview: Float?
-        get() = 17.0f
-    override val ratingGoodReviewVoteCount: Int?
-        get() = 1
-    override val ratingKinopoisk: Float?
-        get() = 7.1f
-    override val ratingKinopoiskVoteCount: Int
-        get() = 6099
-    override val ratingImdb: Float?
-        get() = 7.3f
-    override val ratingImdbVoteCount: Int
-        get() = 8721
-    override val ratingFilmCritics: Float?
-        get() = 6.6f
-    override val ratingFilmCriticsVoteCount: Int
-        get() = 31
-    override val ratingAwait: Float?
-        get() = 99.0f
-    override val ratingAwaitCount: Int
-        get() = 19970
-    override val ratingRfCritics: Float?
-        get() = null
-    override val ratingRfCriticsVoteCount: Int
-        get() = 0
-    override val webUrl: String
-        get() = "https://www.kinopoisk.ru/film/4414587/"
-    override val year: Int?
-        get() = 2024
-    override val filmLength: Int?
-        get() = 120
-    override val slogan: String?
-        get() = null
-    override val description: String
-        get() = "1942 год, Великобритания. Они—лучшие излучших. Отпетые авантюристы и первоклассные спецы, привыкшие действовать в одиночку. Но когда на кону стоит судьба всего мира, им приходится объединиться в сверхсекретное боевое подразделение и отправиться на выполнение дерзкой миссии против нацистов. Теперь их дело — война, и вести они её будут совершенно не по-джентльменски."
-    override val shortDescription: String
-        get() = "Отряду авантюристов поручают невыполнимую миссию. Новый фильм Гая Ричи и продюсера «Пиратов Карибского моря»"
-    override val editorAnnotation: String
-        get() = "В мае на Кинопоиске"
-    override val isTicketsAvailable: Boolean
-        get() = false
-    override val productionStatus: String?
-        get() = null
-    override val type: String?
-        get() = "FILM"
-    override val ratingMpaa: String
-        get() = "r"
-    override val ratingAgeLimits: String
-        get() = "age18"
-    override val hasImax: Boolean
-        get() = false
-    override val has3D: Boolean
-        get() = false
-    override val lastSync: String
-        get() = "2024-05-06T18:07:16.522463"
-    override val countries: List<Country>
-        get() = listOf(object : Country {
-            override val country: String
-                get() = "США"
 
-        },
-            object : Country {
-                override val country: String
-                    get() = "Великобритания"
-
-            },
-            object : Country {
-                override val country: String
-                    get() = "Турция"
-
-            })
-    override val genres: List<Genre>
-        get() = listOf(object : Genre {
-            override val genre: String
-                get() = "драма"
-
-        },
-            object : Genre {
-                override val genre: String
-                    get() = "боевик"
-
-            },
-            object : Genre {
-                override val genre: String
-                    get() = "военный"
-
-            },
-            object : Genre {
-                override val genre: String
-                    get() = "история"
-
-            })
-    override val startYear: Int?
-        get() = null
-    override val endYear: Int?
-        get() = null
-    override val serial: Boolean
-        get() = false
-    override val shortFilm: Boolean
-        get() = false
-    override val completed: Boolean
-        get() = false
-
-}
 val dragonEpisode = object : Episode {
     override val seasonNumber: Int
         get() = 1
@@ -206,9 +81,9 @@ val emptyMovieCard = object : MovieCollection {
                 get() = "action"
         }
         )
-    override val raitingKP: Float?
+    override val ratingKP: Float?
         get() = 10.0f
-    override val raitingImdb: Float?
+    override val ratingImdb: Float?
         get() = null
     override val year: Int?
         get() = 2000

@@ -167,9 +167,9 @@ data class MovieCollectionDto(
     @Json(name = "genres")
     override val genre: List<GenreDto>,
     @Json(name= "ratingKinopoisk")
-    override val raitingKP: Float?,
+    override val ratingKP: Float?,
     @Json(name= "ratingImdb")
-    override val raitingImdb: Float?,
+    override val ratingImdb: Float?,
     @Json(name = "year")
     override val year: Int?,
     @Json(name = "type")
@@ -400,8 +400,8 @@ fun movieCollectionDbtoMovieDb(movieCollectionDB: MovieCollectionDB): MovieDb {
         nameOriginal = movieCollectionDB.nameOriginal,
         countries = movieCollectionDB.countries?.let { listOf(CountryImpl(it)) } ?: emptyList(),
         genre = movieCollectionDB.genre?.let { listOf(GenreImpl(it)) } ?: emptyList(),
-        raitingKP = movieCollectionDB.ratingKP,
-        raitingImdb = movieCollectionDB.ratingImdb,
+        ratingKP = movieCollectionDB.ratingKP,
+        ratingImdb = movieCollectionDB.ratingImdb,
         year = movieCollectionDB.year,
         type = movieCollectionDB.type,
         posterUrl = movieCollectionDB.posterUrl,
@@ -418,8 +418,8 @@ fun movieDbToMovieCollectionDb(movieDb: MovieDb): MovieCollectionDB {
         nameOriginal = movieDb.nameOriginal,
         countries = movieDb.countries?.first()?.country,
         genre = movieDb.genre?.first()?.genre,
-        ratingKP = movieDb.raitingKP,
-        ratingImdb = movieDb.raitingImdb,
+        ratingKP = movieDb.ratingKP,
+        ratingImdb = movieDb.ratingImdb,
         year = movieDb.year,
         type = movieDb.type,
         posterUrl = movieDb.posterUrl,

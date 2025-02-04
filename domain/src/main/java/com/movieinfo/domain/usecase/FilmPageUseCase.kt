@@ -15,7 +15,7 @@ class GetFilmUseCase @Inject constructor(private val mainMovieRepository: MainMo
 
 class GetSeasonsUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
     suspend operator fun invoke(id: Int) =
-        mainMovieRepository.getSeasons(id)
+        mainMovieRepository.loadSeasons(id)
 }
 
 class GetMovieCollectionsIdUseCase @Inject constructor(private val mainMovieRepository: MainMovieRepository) {
@@ -78,8 +78,8 @@ class AddToMyCollectionUseCase @Inject constructor(
                         nameRU = movieBaseInfo.nameRU,
                         nameENG = movieBaseInfo.nameENG,
                         nameOriginal = movieBaseInfo.nameOriginal,
-                        raitingKP = movieBaseInfo.ratingKinopoisk,
-                        raitingImdb = movieBaseInfo.ratingImdb,
+                        ratingKP = movieBaseInfo.ratingKinopoisk,
+                        ratingImdb = movieBaseInfo.ratingImdb,
                         year = movieBaseInfo.year,
                         type = movieBaseInfo.type
                     )
@@ -104,8 +104,8 @@ class AddToMyCollectionUseCase @Inject constructor(
                         nameRU = movieBaseInfo.nameRU,
                         nameENG = movieBaseInfo.nameENG,
                         nameOriginal = movieBaseInfo.nameOriginal,
-                        raitingKP = movieBaseInfo.ratingKinopoisk,
-                        raitingImdb = movieBaseInfo.ratingImdb,
+                        ratingKP = movieBaseInfo.ratingKinopoisk,
+                        ratingImdb = movieBaseInfo.ratingImdb,
                         year = movieBaseInfo.year,
                         type = movieBaseInfo.type
                     )

@@ -2,6 +2,7 @@ package com.movieinfo.data.repository
 
 
 import com.movieinfo.data.KinopoiskApi
+import com.movieinfo.data.db.MyMovieCollectionsDb
 import com.movieinfo.data.extensions.toMovieDb
 import com.movieinfo.data.extensions.toMyMovieCollections
 import com.movieinfo.data.extensions.toMyMovieDb
@@ -18,10 +19,8 @@ import com.movieinfo.data.repository.storage.MovieStorage
 import com.movieinfo.domain.entity.MovieGallery
 import com.movieinfo.domain.models.LoadStateUI
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.timeout
 import org.threeten.bp.Instant
 import org.threeten.bp.Month
 import org.threeten.bp.Year
@@ -44,10 +43,10 @@ class MainMovieRepositoryImpl(
             ).items.map {
                 MovieCollectionImpl(
                     prevPosterUrl = it.prevPosterUrl,
-                    nameRU = it.nameRU, raitingKP = null,
+                    nameRU = it.nameRU, ratingKP = null,
                     genre = it.genre, kpID = it.kpID, nameENG = it.nameENG,
                     year = it.year, posterUrl = it.posterUrl, countries = it.countries,
-                    raitingImdb = null, nameOriginal = null, type = "FILM", imdbId = null
+                    ratingImdb = null, nameOriginal = null, type = "FILM", imdbId = null
                 )
             }
 
@@ -73,14 +72,14 @@ class MainMovieRepositoryImpl(
                         MovieCollectionImpl(
                             prevPosterUrl = it.prevPosterUrl,
                             nameRU = it.nameRU,
-                            raitingKP = null,
+                            ratingKP = null,
                             genre = it.genre,
                             kpID = it.kpID,
                             nameENG = it.nameENG,
                             year = it.year,
                             posterUrl = it.posterUrl,
                             countries = it.countries,
-                            raitingImdb = null,
+                            ratingImdb = null,
                             nameOriginal = null,
                             type = "FILM",
                             imdbId = null
@@ -108,7 +107,7 @@ class MainMovieRepositoryImpl(
     }.distinctUntilChanged()
 
 
-    override suspend fun getSeasons(id: Int) = flow {
+    override suspend fun loadSeasons(id: Int) = flow {
         emit(LoadStateUI.Loading)
         try {
             emit(LoadStateUI.Success(
@@ -120,7 +119,7 @@ class MainMovieRepositoryImpl(
     }.distinctUntilChanged()
 
 
-    override suspend fun getSimilarMovieFlow(id: Int) = flow {
+    override suspend fun loadSimilarMovieFlow(id: Int) = flow {
         emit(LoadStateUI.Loading)
         try {
             emit(LoadStateUI.Success(
@@ -133,8 +132,8 @@ class MainMovieRepositoryImpl(
                 nameOriginal = it.nameOriginal,
                 countries = null,
                 genre = null,
-                raitingKP = null,
-                raitingImdb = null,
+                ratingKP = null,
+                ratingImdb = null,
                 year = null,
                 type = null,
                 posterUrl = it.posterUrl,
@@ -148,7 +147,7 @@ class MainMovieRepositoryImpl(
     }.distinctUntilChanged()
 
 
-    override suspend fun getSimilarMovie(id: Int): List<MovieCollection> {
+    override suspend fun loadSimilarMovie(id: Int): List<MovieCollection> {
         return api.getSimilarMovie(id)?.items.orEmpty().map {
             MovieCollectionImpl(
                 kpID = it.filmID,
@@ -158,8 +157,8 @@ class MainMovieRepositoryImpl(
                 nameOriginal = it.nameOriginal,
                 countries = null,
                 genre = null,
-                raitingKP = null,
-                raitingImdb = null,
+                ratingKP = null,
+                ratingImdb = null,
                 year = null,
                 type = null,
                 posterUrl = it.posterUrl,
@@ -293,5 +292,8 @@ class MainMovieRepositoryImpl(
 
     override suspend fun updateMovie(movie: MovieDb) {
         movieStorage.updateMovie(movie.toMyMovieDb())
+    }
+    suspend fun removeCollection(myMovieCollectionsDb: MyMovieCollectionsDb){
+        movieStorage.removeMyCollections(myMovieCollectionsDb = myMovieCollectionsDb)
     }
 }

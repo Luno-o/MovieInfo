@@ -79,7 +79,7 @@ fun SearchPageView(
             LazyColumn(modifier.padding(horizontal = 16.dp)) {
                 items(movies.itemCount) {
                     movies[it]?.let { it1 ->
-                        FilmographyMovieItem(movieCard = movies[it])
+                        FilmographyMovieItem(movieCard = movies[it],navController)
                     }
                 }
                 movies.apply {
