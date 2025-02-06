@@ -25,7 +25,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -86,7 +85,7 @@ class FilmPageViewModel @Inject constructor(
     }}
 
     suspend fun loadSeasons(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO){
                 getSeasonsUseCase(id).collect{
             _seasons.value = it
                 }
@@ -173,7 +172,7 @@ class FilmPageViewModel @Inject constructor(
     }
 
     suspend fun loadSimilarMovie(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
                 getSimilarCollectionFlowUseCase(id).collect{
             _similarMovies.value = it
                 }

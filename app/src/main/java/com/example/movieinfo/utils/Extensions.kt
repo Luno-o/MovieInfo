@@ -55,4 +55,3 @@ data class SearchMovieFilterImpl(
     override var queryState: String = ""
 
 ) : SearchMovieFilter
-
