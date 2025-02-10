@@ -182,10 +182,10 @@ fun FilmPageView(
                     )
                 }
                 Text(
-                    text = "${movieBaseInfo.data.ratingKinopoisk} ${movieBaseInfo.data.nameRU}",
+                    text = "${movieBaseInfo.data.ratingKinopoisk?:""} ${movieBaseInfo.data.nameRU?:""}",
                     color = Color.LightGray
                 )
-                Text(text = "${movieBaseInfo.data.year} ${
+                Text(text = "${movieBaseInfo.data.year?:""} ${
                     movieBaseInfo
                         .data.genres.joinToString { it.genre }
                 }", color = Color.LightGray

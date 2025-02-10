@@ -173,10 +173,10 @@ fun SerialPageView(
                     )
                 }
                 Text(
-                    text = "${movieBaseInfo.data.ratingKinopoisk} ${movieBaseInfo.data.nameRU}",
+                    text = "${movieBaseInfo.data.ratingKinopoisk?:""} ${movieBaseInfo.data.nameRU?:""}",
                     color = Color.LightGray
                 )
-                Text(text = "${movieBaseInfo.data.year} ${
+                Text(text = "${movieBaseInfo.data.year?:""} ${
                     movieBaseInfo.data
                         .genres.joinToString { it.genre }
                 }", color = Color.LightGray
@@ -212,7 +212,7 @@ fun SerialPageView(
             var overflowSD = TextOverflow.Ellipsis
             val maxLineSD = remember { mutableIntStateOf(2) }
             Text(
-                text = "${movieBaseInfo.data.shortDescription}",
+                text = movieBaseInfo.data.shortDescription?: stringResource(R.string.no_short_description),
                 fontSize = 16.sp,
                 maxLines = maxLineSD.intValue,
                 fontWeight = FontWeight.Bold,
@@ -306,8 +306,8 @@ fun SerialPageView(
             )
         }
             }}
-        }
         Spacer(modifier = Modifier.height(128.dp))
+        }
         }
     }
 }
